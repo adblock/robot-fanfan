@@ -1,4 +1,13 @@
-export class CrowdsModifyBindAdjusterClass {
+/**
+ * CrowdsModifyBindAdjusterClass 
+ * 
+ * 修改人群接口的实例类，处理策略传入的数据构造成，接口文档要求的数据结构
+ * 
+ * */
+
+import { AdjusterInterface } from "./adjuster.interface";
+
+export class CrowdsModifyBindAdjusterClass implements AdjusterInterface {
     public data:{
         crowds: {
             price:number,
@@ -8,8 +17,6 @@ export class CrowdsModifyBindAdjusterClass {
         adgroup_id: number;
     } | undefined;
     public api = 'taobao.feedflow.item.crowd.modifybind';
-
-    // constructor(data:any){}
 
     public add(params:{price:number, status:string, crowd_id:number, adgroup_id:number}):void {
         if(this.data === undefined){

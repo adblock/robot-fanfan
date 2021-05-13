@@ -1,10 +1,17 @@
+/**
+ * AverageCostStrategyClass 
+ * 
+ * 人群平均花费策略的实例类，根据传入的数据，筛选数据，计算数据，构造为adjuster类
+ * 
+ * */
+
 import { StrategyFuncClass } from './strategy.func.class';
 import { StrategyInterface } from './strategy.interface';
 import { CrowdsModifyBindAdjusterClass } from '../adjuster/crowds.modifybind.adjuster';
 
 export class AverageCostStrategyClass implements StrategyInterface {
-    public data:[any];
-    constructor(data:any){
+    public data:object[];
+    constructor(data:object[]){
         this.data = data;
     }
     public handle():CrowdsModifyBindAdjusterClass{
@@ -26,12 +33,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
             crowd_id:0,
             adgroup_id:0
         });
-        crowdsAdjuster.add({
-            price:0,
-            status:'start',
-            crowd_id:0,
-            adgroup_id:0
-        });
+        
         return crowdsAdjuster;
     }
 }

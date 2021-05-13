@@ -10,10 +10,13 @@ import { StrategyInterface } from './strategy.interface';
 import { CrowdsModifyBindAdjusterClass } from '../adjuster/crowds.modifybind.adjuster';
 
 export class AverageCostStrategyClass implements StrategyInterface {
+    // 需要筛选的数据
     public data:object[];
     constructor(data:object[]){
         this.data = data;
     }
+    
+    // 计算的方法，返回CrowdsModifyBindAdjusterClass
     public handle():CrowdsModifyBindAdjusterClass{
         let strategy = new StrategyFuncClass(this.data);
         let result = strategy.fliter([['ad_pv','>','2'],['campaign_id','=',5]])

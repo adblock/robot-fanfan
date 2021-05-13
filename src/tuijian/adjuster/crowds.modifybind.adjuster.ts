@@ -8,6 +8,8 @@
 import { AdjusterInterface } from "./adjuster.interface";
 
 export class CrowdsModifyBindAdjusterClass implements AdjusterInterface {
+    
+    // 构造的数据结构
     public data:{
         crowds: {
             price:number,
@@ -16,8 +18,17 @@ export class CrowdsModifyBindAdjusterClass implements AdjusterInterface {
         }[];
         adgroup_id: number;
     } | undefined;
-    public api = 'taobao.feedflow.item.crowd.modifybind';
 
+    // 接口名称
+    public api = 'taobao.feedflow.item.crowd.modifybind';
+    
+    /**
+     * 构造数据接受参数的方法
+     * price      定向价格
+     * status     定向状态
+     * crowd_id   定向id
+     * adgroup_id 单元id
+     * **/
     public add(params:{price:number, status:string, crowd_id:number, adgroup_id:number}):void {
         if(this.data === undefined){
             this.data = {

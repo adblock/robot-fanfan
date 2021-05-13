@@ -11,31 +11,24 @@ export class CrowdsModifyBindAdjusterClass {
 
     // constructor(data:any){}
 
-    public add(data:{price:number, status:string, crowd_id:number}):void {
-        this.data = {
-            crowds:[
-                {
-                    price:0,
-                    status:'start',
-                    crowd_id:0,
-                },
-                {
-                    price:0,
-                    status:'start',
-                    crowd_id:0,
-                },
-                {
-                    price:0,
-                    status:'start',
-                    crowd_id:0,
-                },
-                {
-                    price:0,
-                    status:'start',
-                    crowd_id:0,
-                }
-            ],
-            adgroup_id:1111,
+    public add(params:{price:number, status:string, crowd_id:number, adgroup_id:number}):void {
+        if(this.data === undefined){
+            this.data = {
+                crowds:[
+                    {
+                        price: params.price,
+                        status: params.status,
+                        crowd_id: params.crowd_id,
+                    }
+                ],
+                adgroup_id: params.adgroup_id,
+            }
+        }else{
+            this.data.crowds.push({
+                price:0,
+                status:'start',
+                crowd_id:0,
+            });
         }
     }
 }

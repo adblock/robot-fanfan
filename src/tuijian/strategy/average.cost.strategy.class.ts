@@ -12,12 +12,25 @@ export class AverageCostStrategyClass implements StrategyInterface {
         let result = strategy.fliter([['ad_pv','>','2'],['campaign_id','=',5]])
             .getResult();
         
-            let crowdsAdjuster = new CrowdsModifyBindAdjusterClass();
+        let crowdsAdjuster = new CrowdsModifyBindAdjusterClass();
 
         crowdsAdjuster.add({
             price:0,
             status:'start',
             crowd_id:0,
+            adgroup_id:0
+        });
+        crowdsAdjuster.add({
+            price:0,
+            status:'start',
+            crowd_id:0,
+            adgroup_id:0
+        });
+        crowdsAdjuster.add({
+            price:0,
+            status:'start',
+            crowd_id:0,
+            adgroup_id:0
         });
         return crowdsAdjuster;
     }

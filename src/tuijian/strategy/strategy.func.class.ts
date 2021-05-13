@@ -6,8 +6,8 @@ export class StrategyFuncClass {
     }
     private data = {};
     private fliterCount = 0;
-    private tmpResult:Array<any> = [];
-    private result:Array<any> = [];
+    private tmpResult:object[] = [];
+    private result:object[] = [];
     private conditions = {
         '>':this.gt,
         '<':this.lt,
@@ -16,6 +16,7 @@ export class StrategyFuncClass {
         '>=':this.gte,
         '!==':this.notEq,
     };
+
     private gt(fKey:string,fValue:string,data:[any]){
         return _.filter(data, function (value) {
             return _.gt(value[fKey], fValue);
@@ -27,28 +28,32 @@ export class StrategyFuncClass {
             return _.lt(value[fKey], fValue);
         });
     }
+
     private eq(fKey:string,fValue:string,data:[any]){
         return _.filter(data, function (value) {
             return _.isEqual(value[fKey], fValue);
         });
     }
+
     private lte(fKey:string,fValue:string,data:[any]){
         return _.filter(data, function (value) {
             return _.lte(value[fKey], fValue);
         });
     }
+
     private gte(fKey:string,fValue:string,data:[any]){
         return _.filter(data, function (value) {
             return _.gte(value[fKey], fValue);
         });
     }
+
     private notEq(fKey:string,fValue:string,data:[any]){
         return _.filter(data, function (value) {
             return !_.eq(value[fKey], fValue);
         });
     }
 
-    public fliter(cons: Array<string[]>): any {
+    public fliter(cons: Array<any>):StrategyFuncClass {
         let data:{};
         if(this.fliterCount === 0){
             data = this.data;

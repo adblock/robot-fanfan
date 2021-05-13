@@ -2,7 +2,8 @@
  * AverageCostStrategyClass 
  * 
  * 人群平均花费策略的实例类，根据传入的数据，筛选数据，计算数据，构造为adjuster类
- * 
+ * this.data 数据结构参考以下文档中的响应参数
+ * 超级推荐【商品推广】单元分时报表查询-文档：https://open.taobao.com/API.htm?docId=43477&docType=2
  * */
 
 import { StrategyFuncClass } from './strategy.func.class';

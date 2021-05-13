@@ -2,6 +2,7 @@
  * CrowdsModifyBindAdjusterClass 
  * 
  * 修改人群接口的实例类，处理策略传入的数据构造成，接口文档要求的数据结构
+ * 修改人群出价或状态-文档：https://open.taobao.com/API.htm?docId=43252&docType=2
  * 
  * */
 

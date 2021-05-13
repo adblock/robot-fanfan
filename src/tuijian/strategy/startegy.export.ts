@@ -1,5 +1,5 @@
 /**
- * 将策略key-value的 export 以供程序调用
+ * 将策略key-value的export以供程序调用
  * **/
 import { AverageCostStrategyClass } from "./average.cost.strategy.class"
 

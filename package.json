@@ -1,0 +1,21 @@
+{
+  "name": "robot-fanfan",
+  "version": "1.0.0",
+  "description": "robot fanfan",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://gitlab.jupin.net.cn/taobao_api/robot-fanfan.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.2.4"
+  },
+  "devDependencies": {
+    "ts-node": "^9.1.1"
+  }
+}

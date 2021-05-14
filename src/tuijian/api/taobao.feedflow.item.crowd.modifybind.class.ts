@@ -1,17 +1,20 @@
 /**
- * CrowdsModifyBindAdjusterClass 
+ * TaobaoFeedflowItemCrowdModifyBindClass
  * 
  * 修改人群接口的实例类，处理策略传入的数据构造成，接口文档要求的数据结构
  * 修改人群出价或状态-文档：https://open.taobao.com/API.htm?docId=43252&docType=2
  * 
  * */
 
-import { AdjusterInterface } from "./adjuster.interface";
+import { ApiInterface } from "./api.interface";
 
-export class CrowdsModifyBindAdjusterClass implements AdjusterInterface {
-    
+export class TaobaoFeedflowItemCrowdModifyBindClass implements ApiInterface {
+    // 接口名称
+    public api = 'taobao.feedflow.item.crowd.modifybind';
+    // 响应参数
+    public reponse:any | undefined;
     // 构造的数据结构
-    public data:{
+    public request:{
         crowds: {
             price:number,
             status:string,
@@ -20,9 +23,6 @@ export class CrowdsModifyBindAdjusterClass implements AdjusterInterface {
         adgroup_id: number;
     } | undefined;
 
-    // 接口名称
-    public api = 'taobao.feedflow.item.crowd.modifybind';
-    
     /**
      * 构造数据接受参数的方法
      * price      定向价格
@@ -30,9 +30,9 @@ export class CrowdsModifyBindAdjusterClass implements AdjusterInterface {
      * crowd_id   定向id
      * adgroup_id 单元id
      * **/
-    public add(params:{price:number, status:string, crowd_id:number, adgroup_id:number}):void {
-        if(this.data === undefined){
-            this.data = {
+    public setRequest(params:{price:number, status:string, crowd_id:number, adgroup_id:number}):void {
+        if(this.request === undefined){
+            this.request = {
                 crowds:[
                     {
                         price: params.price,
@@ -43,11 +43,26 @@ export class CrowdsModifyBindAdjusterClass implements AdjusterInterface {
                 adgroup_id: params.adgroup_id,
             }
         }else{
-            this.data.crowds.push({
+            this.request.crowds.push({
                 price:0,
                 status:'start',
                 crowd_id:0,
             });
         }
+    }
+
+    // 获取请求
+    public getResponse():any{
+        if(this.reponse === undefined){
+            this.reponse = {
+                "feedflow_item_crowd_modifybind_response":{
+                    "result":{
+                        "message":"成功",
+                        "success":false
+                    }
+                }
+            }
+        }
+        return this.reponse;
     }
 }

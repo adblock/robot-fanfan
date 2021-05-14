@@ -1,5 +1,5 @@
 /**
- * Adjuster 类接口 构造API请求的必须数据
+ * API 类接口 构造API请求的必须数据
  * 
  **/
 export interface ApiInterface {

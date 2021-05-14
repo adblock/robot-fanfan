@@ -6,9 +6,13 @@
  * 
  * */
 
+import { ApiClass } from "./api.class";
 import { ApiInterface } from "./api.interface";
 
-export class TaobaoFeedflowItemCrowdRpthourlistClass implements ApiInterface {
+export class TaobaoFeedflowItemCrowdRpthourlistClass extends ApiClass implements ApiInterface {
+    constructor(){
+        super();
+    }
     // 接口名称
     public api = 'taobao.feedflow.item.crowd.rpthourlist';
     // 响应参数

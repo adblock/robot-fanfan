@@ -1,14 +1,18 @@
 /**
  * TaobaoFeedflowItemCrowdModifyBindClass
  * 
- * 修改人群接口的实例类，处理策略传入的数据构造成，接口文档要求的数据结构
- * 修改人群出价或状态-文档：https://open.taobao.com/API.htm?docId=43252&docType=2
+ * 修改人群出价或状态的类，处理策略传入的数据构造成，接口文档要求的数据结构
+ * 文档：https://open.taobao.com/API.htm?docId=43252&docType=2
  * 
  * */
 
 import { ApiInterface } from "./api.interface";
+import { ApiClass } from './api.class';
 
-export class TaobaoFeedflowItemCrowdModifyBindClass implements ApiInterface {
+export class TaobaoFeedflowItemCrowdModifyBindClass extends ApiClass implements ApiInterface {
+    constructor(){
+        super();
+    }
     // 接口名称
     public api = 'taobao.feedflow.item.crowd.modifybind';
     // 响应参数

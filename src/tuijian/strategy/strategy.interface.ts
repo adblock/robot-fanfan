@@ -8,5 +8,5 @@ export interface StrategyInterface {
     strategyData:object;
     fliterData:any;
     adjusteData:any;
-    handle():ApiInterface;
+    handle():Promise<ApiInterface>;
 }

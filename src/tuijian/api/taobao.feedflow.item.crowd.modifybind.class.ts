@@ -58,14 +58,12 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends ApiClass implements 
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = {
-                "feedflow_item_crowd_modifybind_response":{
-                    "result":{
-                        "message":"成功",
-                        "success":false
-                    }
-                }
-            }
+            this.reponse = this.client.execute('taobao.httpdns.get',{}).then(function (res) {
+                // console.log(res,3);
+                return res;
+            }).catch(data=>{
+                console.log(data,'231090192830912893081098310298');
+            });
         }
         return this.reponse;
     }

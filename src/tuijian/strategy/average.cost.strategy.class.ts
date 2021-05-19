@@ -1,9 +1,9 @@
 /**
  * AverageCostStrategyClass 
  * 
- * 人群平均花费策略的实例类，根据传入的数据，筛选数据，计算数据，构造为adjuster类
- * this.data 数据结构参考以下文档中的响应参数
- * 超级推荐【商品推广】单元分时报表查询-文档：https://open.taobao.com/API.htm?docId=43477&docType=2
+ * 人群平均花费策略的实例类，根据传入的数据，筛选数据，计算数据，构造为api类
+ * 超级推荐【商品推广】单元分时报表查询
+ * 文档：https://open.taobao.com/API.htm?docId=43477&docType=2
  * */
 
 import { StrategyFuncClass } from './strategy.func.class';
@@ -19,41 +19,52 @@ export class AverageCostStrategyClass implements StrategyInterface {
     public adjusteData:any | undefined;
     
     constructor(
-            strategyData:object,
+            strategyData:any,
             fliterData:ApiInterface,
             adjusteData:ApiInterface,
         ){
         // 设置策略数据
         this.strategyData = strategyData;
         // 设置策略数据
-        this.fliterData = fliterData.getResponse();
+        this.fliterData = fliterData;
         // 结果
         this.adjusteData = adjusteData;
     }
-    
-    // 计算的方法，返回CrowdsModifyBindAdjusterClass
-    public handle():ApiInterface{
-        let strategy = new StrategyFuncClass(this.fliterData);
-        let result = strategy.fliter([['ad_pv','>','2'],['campaign_id','=',5]])
-            .getResult();
 
-        this.adjusteData.setRequest({
-            price:0,
-            status:'start',
-            crowd_id:0,
-            adgroup_id:0
+    private fliter(fliterData:any){
+        const result = fliterData.getResponse().then((data:any)=>{
+            // console.log(data,1)
+            return data;
+        })
+        return result;
+    }
+
+    private adjuster (adjusteData:any){
+        const result = adjusteData.then((data:any)=>{
+            // console.log(data,2);
+            this.adjusteData.setRequest({
+                price:1, 
+                status:'start', 
+                crowd_id:2, 
+                adgroup_id:3
+            })
+            return this.adjusteData.getResponse()
         });
-        this.adjusteData.setRequest({
-            price:0,
-            status:'start',
-            crowd_id:0,
-            adgroup_id:0
-        });
-        
-        return this.adjusteData;
+        return result;
+    }
+
+    // 计算的方法，返回CrowdsModifyBindAdjusterClass
+    public handle():Promise<ApiInterface>{
+        // 获取人群数据筛选出结果数据
+        const fliterDataResult   = this.fliter(this.fliterData);
+        // 根据筛选结果，声明更改数据的接口对象
+        const adjusterDataResult = this.adjuster(fliterDataResult);
+        adjusterDataResult.then(function (data:any) {
+            // console.log(new Date());
+            // console.log(data.httpdns_get_response.request_id);
+        })
+        // 请求数据
+        return adjusterDataResult;
     }
 }
-
-
-
 

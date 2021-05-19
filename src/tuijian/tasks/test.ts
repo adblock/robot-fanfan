@@ -3,7 +3,7 @@ import { TaobaoFeedflowItemCrowdModifyBindClass,TaobaoFeedflowItemCrowdRpthourli
 
 
 
-for (let i = 0; i < 8000; i++) {
+for (let i = 0; i < 1; i++) {
     console.log(i,'----------------------------------------------');
     // 选择策略生成数据
     const taobaoFeedflowItemCrowdRpthourlist = new TaobaoFeedflowItemCrowdRpthourlistClass;

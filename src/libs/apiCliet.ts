@@ -57,7 +57,7 @@ export class ApiClient {
     public execute(method:string,params:any) {
     params.method = method;
     const url = this.signUrl(params);
-    return axios.post(url).then((data)=>{
+    return axios.post(url,params).then((data)=>{
         return data.data;
     }).catch(data=>{
         console.log(data,'231090192830912893081098310298');

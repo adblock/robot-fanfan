@@ -44,7 +44,7 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends ApiClass implements
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.client.execute('taobao.httpdns.get',{}).then(function (res) {
+            this.reponse = this.client.execute('taobao.httpdns.get',{test:11111}).then(function (res) {
                 console.log(new Date());
                 console.log(res.httpdns_get_response.request_id);
                 return res;

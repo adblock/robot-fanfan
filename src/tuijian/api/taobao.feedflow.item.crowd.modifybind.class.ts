@@ -59,7 +59,8 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends ApiClass implements 
     public getResponse():any{
         if(this.reponse === undefined){
             this.reponse = this.client.execute('taobao.httpdns.get',{}).then(function (res) {
-                // console.log(res,3);
+                console.log('2--------------------------------------');
+                console.log(res.httpdns_get_response.request_id);
                 return res;
             }).catch(data=>{
                 console.log(data,'231090192830912893081098310298');

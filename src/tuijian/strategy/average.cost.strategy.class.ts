@@ -39,8 +39,8 @@ export class AverageCostStrategyClass implements StrategyInterface {
         return result;
     }
 
-    private adjuster (adjusteData:any){
-        const result = adjusteData.then((data:any)=>{
+    private adjuster (fliterDataResult:any){
+        const result = fliterDataResult.then((data:any)=>{
             // console.log(data,2);
             this.adjusteData.setRequest({
                 price:1, 

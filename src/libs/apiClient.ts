@@ -2,7 +2,6 @@ import axios from "axios";
 import { format } from "date-fns";
 import querystring from "querystring";
 import CryptoJS  from "crypto-js";
-import * as http from "http"
 
 export class ApiClient {
     private options:{
@@ -58,11 +57,11 @@ export class ApiClient {
     public execute(method:string,params:any) {
         params.method = method;
         const url = this.signUrl(params);
-        axios.defaults.timeout = 80000;
+        // axios.defaults.timeout = 1000;
         return axios.post(url,params).then((data)=>{
             return data.data;
         }).catch(data=>{
-            console.log(data.code);
+            console.log(data);
         });
     };
 

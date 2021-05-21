@@ -37,5 +37,5 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-src/tuijian/env/env.ts
+src/env/env.ts
 src/zhitongche/env/env.ts

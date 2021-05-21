@@ -12,7 +12,7 @@ import { ApiInterface } from '../api/api.interface';
 
 export class AverageCostStrategyClass implements StrategyInterface {
     // 策略的常量数据
-    public strategyData:object | {};
+    public strategyData:any | {};
     // 需要筛选的数据
     public fliterData:any | undefined;
     // 最终调整的结果
@@ -33,9 +33,10 @@ export class AverageCostStrategyClass implements StrategyInterface {
 
     private fliter(fliterData:any){
         const result = fliterData.getResponse().then((data:any)=>{
-            console.log(data,1)
+            console.log(this.strategyData.test);
+            console.log(data);
             return data;
-        })
+        });
         return result;
     }
 

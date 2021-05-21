@@ -14,7 +14,7 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends ApiClass implements 
         super();
     }
     // 接口名称
-    public api = 'taobao.feedflow.item.crowd.modifybind';
+    public api = 'taobao.httpdns.get'; //taobao.feedflow.item.crowd.modifybind
     // 响应参数
     public reponse:any | undefined;
     // 构造的数据结构
@@ -58,7 +58,7 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends ApiClass implements 
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.client.execute('taobao.httpdns.get',{}).then(function (res) {
+            this.reponse = this.client.execute(this.api,{}).then(function (res) {
                 // console.log('2--------------------------------------');
                 // console.log(res);
                 return res;

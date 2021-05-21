@@ -14,7 +14,7 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends ApiClass implements
         super();
     }
     // 接口名称
-    public api = 'taobao.feedflow.item.crowd.rpthourlist';
+    public api = 'taobao.httpdns.get'; // taobao.feedflow.item.crowd.rpthourlist
     // 响应参数
     public reponse:any | undefined;
     // 构造的数据结构
@@ -44,7 +44,7 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends ApiClass implements
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.client.execute('taobao.httpdns.get',{test:11111}).then(function (res) {
+            this.reponse = this.client.execute(this.api,{test:11111}).then(function (res) {
                 // console.log('1--------------------------------------');
                 // console.log(res);
                 return res;
@@ -53,8 +53,9 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends ApiClass implements
             });
         }
         return this.reponse;
+
         if(this.reponse === undefined){
-            const rep = this.client.execute('taobao.httpdns.get',{});
+            const rep = this.client.execute(this.api,{});
             return rep;
 
             let ddd;

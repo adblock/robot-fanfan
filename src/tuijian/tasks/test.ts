@@ -3,8 +3,8 @@ import { TaobaoFeedflowItemCrowdModifyBindClass,TaobaoFeedflowItemCrowdRpthourli
 
 
 
-for (let i = 0; i < 1; i++) {
-    console.log(i,'----------------------------------------------');
+for (let i = 0; i < 100; i++) {
+    console.log(i,new Date(),'----------------------------------------------');
     // 选择策略生成数据
     const taobaoFeedflowItemCrowdRpthourlist = new TaobaoFeedflowItemCrowdRpthourlistClass;
     taobaoFeedflowItemCrowdRpthourlist.setRequest({
@@ -25,8 +25,8 @@ for (let i = 0; i < 1; i++) {
 }
 
 setInterval(function () {
-    for (let i = 0; i < 4000; i++) {
-        console.log(i,'----------------------------------------------');
+    for (let i = 0; i < 100; i++) {
+        console.log(i,new Date(),'----------------------------------------------');
         // 选择策略生成数据
         const taobaoFeedflowItemCrowdRpthourlist = new TaobaoFeedflowItemCrowdRpthourlistClass;
         taobaoFeedflowItemCrowdRpthourlist.setRequest({
@@ -45,4 +45,4 @@ setInterval(function () {
         );
         averageCostStrategy.handle();
     }
-},180000)
+},10000)

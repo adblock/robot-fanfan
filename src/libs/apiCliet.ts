@@ -2,6 +2,7 @@ import axios from "axios";
 import { format } from "date-fns";
 import querystring from "querystring";
 import CryptoJS  from "crypto-js";
+import * as http from "http"
 
 export class ApiClient {
     private options:{
@@ -55,13 +56,14 @@ export class ApiClient {
 
     // 执行请求
     public execute(method:string,params:any) {
-    params.method = method;
-    const url = this.signUrl(params);
-    return axios.post(url,params).then((data)=>{
-        return data.data;
-    }).catch(data=>{
-        console.log(data,'231090192830912893081098310298');
-    });
-};
+        params.method = method;
+        const url = this.signUrl(params);
+        axios.defaults.timeout = 80000;
+        return axios.post(url,params).then((data)=>{
+            return data.data;
+        }).catch(data=>{
+            console.log(data.code);
+        });
+    };
 
 }

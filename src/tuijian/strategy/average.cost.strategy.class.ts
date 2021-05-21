@@ -33,7 +33,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
 
     private fliter(fliterData:any){
         const result = fliterData.getResponse().then((data:any)=>{
-            // console.log(data,1)
+            console.log(data,1)
             return data;
         })
         return result;

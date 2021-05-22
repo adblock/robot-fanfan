@@ -2,6 +2,7 @@ import axios from "axios";
 import { format } from "date-fns";
 import querystring from "querystring";
 import CryptoJS  from "crypto-js";
+import { TuijianApiConfig } from '../config';
 
 export class ApiClient {
     private options:{
@@ -10,16 +11,12 @@ export class ApiClient {
         url:string;
     };
     
-    constructor(options:any){
-        if (!options.app_key || !options.app_secret) {
-            throw new Error('app_key or app_secret need!');
-        }else{
-            this.options = {
-                app_key:options.app_key,
-                app_secret:options.app_secret,
-                url:options.url || 'http://gw.api.taobao.com/router/rest'
-            }
-        };
+    constructor(){
+        this.options = {
+            app_key:TuijianApiConfig.app_key,
+            app_secret:TuijianApiConfig.app_secret,
+            url: 'http://gw.api.taobao.com/router/rest'
+        }
     }
 
     // 计算签名

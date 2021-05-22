@@ -4,18 +4,22 @@
  **/
 import { ApiClient } from '../../libs/apiClient';
 import { RedisClient } from '../../libs/redisClient';
-import { TuijianApiConfig } from '../../config/api';
 
 export class ApiClass {
-    public client;
+    public topClient;
     public redisClient;
+    public api:string = '';
     constructor(){
-        // TOP客户端
+        // redis 客户端
         this.redisClient = new RedisClient;
-        console.log(this.redisClient);
-        this.client = new ApiClient({
-            app_key:TuijianApiConfig.app_key,
-            app_secret:TuijianApiConfig.app_secret
-        });
+        // TOP 客户端
+        this.topClient = new ApiClient;
+    }
+    /**
+     * 发送请求的方法
+     * @params params any 参数
+     * **/
+    public execute(params:any){
+        return this.topClient.execute(this.api, params);
     }
 }

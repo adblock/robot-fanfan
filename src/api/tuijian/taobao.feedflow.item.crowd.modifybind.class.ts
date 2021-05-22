@@ -6,10 +6,10 @@
  * 
  * */
 
-import { ApiInterface } from "./api.interface";
-import { ApiClass } from './api.class';
+import { ApiInterface } from "../api.interface";
+import {TuijianApiClass} from "./tuijian.api.class";
 
-export class TaobaoFeedflowItemCrowdModifyBindClass extends ApiClass implements ApiInterface {
+export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass implements ApiInterface {
     constructor(){
         super();
     }

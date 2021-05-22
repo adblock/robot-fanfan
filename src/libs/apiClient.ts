@@ -2,8 +2,7 @@ import axios from "axios";
 import { format } from "date-fns";
 import querystring from "querystring";
 import CryptoJS  from "crypto-js";
-import { TuijianApiConfig } from '../config';
-
+import { API_URL } from '../config'
 export class ApiClient {
     private options:{
         app_key:string,
@@ -11,11 +10,11 @@ export class ApiClient {
         url:string;
     };
     
-    constructor(){
+    constructor(options:any){
         this.options = {
-            app_key:TuijianApiConfig.app_key,
-            app_secret:TuijianApiConfig.app_secret,
-            url: 'http://gw.api.taobao.com/router/rest'
+            app_key:options.app_key,
+            app_secret:options.app_secret,
+            url: API_URL
         }
     }
 

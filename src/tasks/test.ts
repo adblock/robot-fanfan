@@ -1,4 +1,4 @@
-import { AverageCostStrategyClass } from '../strategy/average.cost.strategy.class';
+import { AverageCostStrategyClass } from '../strategy/tuijian/average.cost.strategy.class';
 import { TaobaoFeedflowItemCrowdModifyBindClass,TaobaoFeedflowItemCrowdRpthourlistClass } from '../api'
 
 

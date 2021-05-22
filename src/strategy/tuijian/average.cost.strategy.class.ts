@@ -6,9 +6,9 @@
  * 文档：https://open.taobao.com/API.htm?docId=43477&docType=2
  * */
 
-import { StrategyFuncClass } from './strategy.func.class';
-import { StrategyInterface } from './strategy.interface';
-import { ApiInterface } from '../api/api.interface';
+import { StrategyFuncClass } from '../strategy.func.class';
+import { StrategyInterface } from '../strategy.interface';
+import { ApiInterface } from '../../api/api.interface';
 
 export class AverageCostStrategyClass implements StrategyInterface {
     // 策略的常量数据

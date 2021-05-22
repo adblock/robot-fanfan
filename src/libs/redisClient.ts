@@ -15,11 +15,21 @@ export class RedisClient {
         }
         this.client = redis.createClient(redisConfig);
     }
-    // 设置缓存
+
+    /**
+     * 设置缓存
+     * @params data any 存储到缓存的数据
+     * @params expire number 过期时间
+     * @return void
+     * **/
     public setCache(data:any,expire:number){
 
     }
-    // 获取缓存
+    /**
+     * 获取缓存
+     * @params key any 获取数据的key
+     * @return any
+     * **/
     public getCache(key:any){
 
     }

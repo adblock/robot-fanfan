@@ -1,7 +1,6 @@
 import express from 'express';
 import { ApiClient } from '../libs/apiClient';
-import { TuijianApiConfig } from '../config';
-import { ZhitongcheConfig } from '../config';
+import { TuijianApiConfig, ZhitongcheConfig, JushitaConfig } from '../config';
 
 const zhitongcheClient  = new ApiClient( { app_key:ZhitongcheConfig.app_key, app_secret:ZhitongcheConfig.app_secret});
 const tuijianClient  = new ApiClient( { app_key:TuijianApiConfig.app_key, app_secret:TuijianApiConfig.app_secret});
@@ -41,5 +40,6 @@ app.post('/api/tuijian', function (req:any, res:any) {
         res.json(data);
     });
 });
-app.listen(3000,'127.0.0.1');
-console.log(121211);
+app.listen(JushitaConfig.listen_port,JushitaConfig.listen_ip,function () {
+    console.log(JushitaConfig.listen_ip,JushitaConfig.listen_port)
+});

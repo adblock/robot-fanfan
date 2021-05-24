@@ -41,5 +41,5 @@ app.post('/api/tuijian', function (req:any, res:any) {
     });
 });
 app.listen(JushitaConfig.listen_port,JushitaConfig.listen_ip,function () {
-    console.log(JushitaConfig.listen_ip,JushitaConfig.listen_port)
+    console.log(JushitaConfig.listen_ip,JushitaConfig.listen_port);
 });

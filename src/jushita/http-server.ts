@@ -19,14 +19,13 @@ app.use('/api',function (req:any, res:any,next:any) {
         data.method = 'taobao.httpdns.get'
         next();
     }else {
-        res.json({error:'no nick_name,method,params'});
+        res.status(500).json({error:'no nick_name,method,params'});
     }
 });
 
 app.post('/api/zhitongche', function (req:any, res:any) {
     const data = req.body;
-    console.log(data.method);
-    const result = zhitongcheClient.execute(data.method,{});
+    const result = zhitongcheClient.execute(data.method,data.params);
     result.then(function (data:any) {
         res.json(data);
     });
@@ -34,12 +33,12 @@ app.post('/api/zhitongche', function (req:any, res:any) {
 
 app.post('/api/tuijian', function (req:any, res:any) {
     const data = req.body;
-    console.log(data.method);
-    const result = tuijianClient.execute(data.method,{});
+    const result = tuijianClient.execute(data.method,data.params);
     result.then(function (data:any) {
         res.json(data);
     });
 });
+
 app.listen(JushitaConfig.listen_port,JushitaConfig.listen_ip,function () {
     console.log(JushitaConfig.listen_ip,JushitaConfig.listen_port);
 });

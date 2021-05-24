@@ -58,7 +58,7 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass impl
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.execute({}).then(function (res) {
+            this.reponse = this.execute({seesion:12121212121}).then(function (res) {
                 // console.log('2--------------------------------------');
                 // console.log(res);
                 return res;

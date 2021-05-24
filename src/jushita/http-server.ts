@@ -10,26 +10,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 判断接口数据是否正确
 app.use('/api',function (req:any, res:any,next:any) {
     // 跨域
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
-
     const data = req.body;
-    if(!data.hasOwnProperty('nick_name')){
-        res.json({error:'no nick_name'});
-    }
-    if(!data.hasOwnProperty('method')){
-        res.json({error:'no method'});
-    }
-    if(!data.hasOwnProperty('params')){
-        res.json({error:'no params'});
-    }
     if(data.hasOwnProperty('nick_name') && data.hasOwnProperty('method') && data.hasOwnProperty('params')){
         data.method = 'taobao.httpdns.get'
         next();
+    }else {
+        res.json({error:'no nick_name,method,params'});
     }
 });
 
@@ -50,4 +41,5 @@ app.post('/api/tuijian', function (req:any, res:any) {
         res.json(data);
     });
 });
-app.listen(3000);
+app.listen(3000,'127.0.0.1');
+console.log(121211);

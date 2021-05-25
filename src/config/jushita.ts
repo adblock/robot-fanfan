@@ -1,0 +1,5 @@
+import {env} from '../env/env'
+export const JushitaConfig = {
+    listen_ip: 'jushita_listen_ip' in env ? env.jushita_listen_ip : '0.0.0.0',
+    listen_port: 'jushita_listen_port' in env ? env.jushita_listen_port : '3000',
+};

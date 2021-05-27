@@ -53,7 +53,6 @@ export class ApiClient {
     public execute(method:string,params:any) {
         params.method = method;
         const url = this.signUrl(params);
-        // axios.defaults.timeout = 1000;
         return axios.post(url,params).then((data)=>{
             return data.data;
         }).catch(data=>{

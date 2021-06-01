@@ -1,6 +1,7 @@
 import express from 'express';
 import { ApiClient } from '../libs/apiClient';
 import { TuijianApiConfig, ZhitongcheConfig, JushitaConfig } from '../config';
+import cors from 'cors';
 
 const zhitongcheClient  = new ApiClient( { app_key:ZhitongcheConfig.app_key, app_secret:ZhitongcheConfig.app_secret});
 const tuijianClient  = new ApiClient( { app_key:TuijianApiConfig.app_key, app_secret:TuijianApiConfig.app_secret});
@@ -8,12 +9,9 @@ const tuijianClient  = new ApiClient( { app_key:TuijianApiConfig.app_key, app_se
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());// 处理跨域
 
 app.use('/api',function (req:any, res:any,next:any) {
-    // 跨域
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
     const data = req.body;
     if(data.hasOwnProperty('nick_name') && data.hasOwnProperty('method') && data.hasOwnProperty('params')){
         data.method = 'taobao.httpdns.get'

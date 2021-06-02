@@ -18,7 +18,7 @@ router.use('/api', API.index);
 router.post('/api/zhitongche', APIZhitongche.index);
 router.post('/api/tuijian', APITuijian.index);
 // 商家授权
-router.post('/auth/callback/zhitongche', AuthCallback.zhitongche);
-router.post('/auth/callback/tuijian', AuthCallback.tuijian);
+router.get('/auth/callback/zhitongche', AuthCallback.zhitongche);
+router.get('/auth/callback/tuijian', AuthCallback.tuijian);
 
 export { router };

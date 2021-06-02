@@ -5,19 +5,22 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>tuijian</title>
+    <title>聚品超推</title>
 </head>
 <body>
 <div style='margin:0 auto;width:700px;text-align: center;position: fixed;top:50%;left:50%;margin-left:-350px;margin-top:-150px'>
     <img src='http://img.alicdn.com/top/i1/TB1743HnHr1gK0jSZR0SuvP8XXa' alt='聚品超推'>
-    <h1>
-        <a href="#">
-            <button style='font-size: 25px; '>授权失败，请点击再次授权</button>
-        </a>
-    </h1>
-    <h1>订购成功！</h1>
-<p>wangwangID：<b> </b></p>
-<p>access_token：<b> </b></p>
+    <% if (isTokenSuccess) { %>
+        <h1>订购成功！</h1>
+        <p>wangwangID： 12312312312</p>
+        <p>access_token：128973981278391</p>
+    <% }else{ %>
+        <h1>
+            <a href="<%= getCodeUrl %>">
+                <button style='font-size: 25px;cursor: pointer'>授权失败，请点击再次授权</button>
+            </a>
+        </h1>
+    <% }%>
 </div>
 </body>
 </html>

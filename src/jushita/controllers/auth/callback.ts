@@ -18,11 +18,10 @@ const tuijian = function (req:Request, res:Response) {
             code: `${req.query.code}`,
             redirect_uri : `${JushitaConfig.domain}/auth/callback/tuijian`,
         };
-        console.log(getTokenData);
         axios.post(TOP_TOKEN_URL,querystring.stringify(getTokenData)).then((data)=>{
-            console.log(2);
-        }).catch(data=>{
-            console.log(1);
+            console.log(data);
+        }).catch(error=>{
+            console.log(error.response.data);
         });
     }
     res.render('auth/callback/tuijian');

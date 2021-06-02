@@ -1,5 +1,6 @@
 // api接口默认方法
-const index = function (req:any, res:any,next:any) {
+import { Request, Response, NextFunction} from 'express';
+const index = function (req:Request, res:Response,next:NextFunction) {
     const data = req.body;
     if(data.hasOwnProperty('nick_name') && data.hasOwnProperty('method') && data.hasOwnProperty('params')){
         data.method = 'taobao.httpdns.get'

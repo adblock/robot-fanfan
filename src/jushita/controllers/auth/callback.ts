@@ -37,6 +37,7 @@ const tuijian = async (req:Request, res:Response)  => {
         };
         try {
             TokenData = await axios.post(TOP_TOKEN_URL,querystring.stringify(getTokenData));
+            console.log(TokenData);
             isTokenSuccess = true;
             TokenModel.create(TokenData,function (err:any, docs:any) {
                 console.log(err,docs);
@@ -76,6 +77,7 @@ const zhitongche = async (req:Request, res:Response) => {
         };
         try {
             TokenData = await axios.post(TOP_TOKEN_URL,querystring.stringify(getTokenData))
+            console.log(TokenData);
             isTokenSuccess = true;
             TokenModel.create(TokenData,function (err:any, docs:any) {
                 console.log(err,docs);

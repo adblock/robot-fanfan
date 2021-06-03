@@ -4,9 +4,11 @@ import { TuijianApiConfig, ZhitongcheConfig } from '../../../config/api';
 import querystring from "querystring";
 import axios from "axios";
 import { Request, Response} from 'express';
+import {TokenModel} from '../../models/token'
 
 const TOP_AUTH_URL  = 'https://oauth.taobao.com/authorize';
 const TOP_TOKEN_URL = 'https://oauth.taobao.com/token';
+
 export { tuijian, zhitongche }
 
 // 直通车api接口默认方法
@@ -34,8 +36,11 @@ const tuijian = async (req:Request, res:Response)  => {
             redirect_uri : `${JushitaConfig.domain}/auth/callback/tuijian`,
         };
         try {
-            TokenData = await axios.post(TOP_TOKEN_URL,querystring.stringify(getTokenData))
+            TokenData = await axios.post(TOP_TOKEN_URL,querystring.stringify(getTokenData));
             isTokenSuccess = true;
+            TokenModel.create(TokenData,function (err:any, docs:any) {
+                console.log(err,docs)
+            });
         } catch (err) {
             console.error(err.response.data);
         }
@@ -72,6 +77,9 @@ const zhitongche = async (req:Request, res:Response) => {
         try {
             TokenData = await axios.post(TOP_TOKEN_URL,querystring.stringify(getTokenData))
             isTokenSuccess = true;
+            TokenModel.create(TokenData,function (err:any, docs:any) {
+                console.log(err,docs)
+            });
         } catch (err) {
             console.error(err.response.data);
         }
@@ -81,16 +89,6 @@ const zhitongche = async (req:Request, res:Response) => {
         isTokenSuccess:isTokenSuccess,
         TokenData:TokenData,
     });
-};
-/**
- * 存储token数据到数据库
- * @paran toeknData object token数据
- * **/
-const saveToken = function (toeknData:{
-    token:string,
-    type:string,
-}) {
-  //存到mongo
 };
 
 

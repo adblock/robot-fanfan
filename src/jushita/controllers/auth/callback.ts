@@ -10,7 +10,7 @@ const TOP_AUTH_URL  = 'https://oauth.taobao.com/authorize';
 const TOP_TOKEN_URL = 'https://oauth.taobao.com/token';
 
 export { tuijian, zhitongche }
-// 直通车api接口默认方法
+// 超级推荐获取授权
 const tuijian = async (req:Request, res:Response)  => {
     // 是否获取token成功
     let isTokenSuccess = false;
@@ -56,6 +56,8 @@ const tuijian = async (req:Request, res:Response)  => {
         TokenData:TokenData,
     });
 };
+
+// 直通车获取授权
 const zhitongche = async (req:Request, res:Response) => {
     // 是否获取token成功
     let isTokenSuccess = false;

@@ -17,7 +17,6 @@ class Client {
             redisConfig.password = RedisConfig.password;
         }
         if(!this.connected){
-            console.log(1212121);
             this.redis = new Redis(redisConfig);
             this.connected = true;
         }

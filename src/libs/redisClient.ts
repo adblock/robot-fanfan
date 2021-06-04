@@ -14,6 +14,13 @@ export class RedisClient {
             redisConfig.password = RedisConfig.password;
         }
         this.client = redis.createClient(redisConfig);
+        this.client.on("error", function(error) {
+            console.error('error');
+        });
+        this.client.on("ready", (error) =>{
+            console.error('ready');
+        });
+
     }
 
     /**
@@ -23,7 +30,10 @@ export class RedisClient {
      * @return void
      * **/
     public setCache(data:any,expire:number){
-
+        this.client.set("aldjalksjasdasdasdlaksj", "{asdasd:asdasdasdas}");
+        this.client.get("foo",function (err, data) {
+            console.log(data);
+        });
     }
     /**
      * 获取缓存

@@ -12,8 +12,8 @@
     <img src='https://img.alicdn.com///img.alicdn.com/bao/uploaded/TB1btY.ciERMeJjy0FcSuw7opXa' alt='聚品专车'>
     <% if (isTokenSuccess) { %>
         <h1>订购成功！</h1>
-        <p>wangwangID： 12312312312</p>
-        <p>access_token：128973981278391</p>
+        <p>wangwangID： <%= TokenData.wangwang_id %></p>
+        <p>access_token：<%= TokenData.access_token %></p>
     <% }else{ %>
         <h1>
             <a href="<%= getCodeUrl %>">

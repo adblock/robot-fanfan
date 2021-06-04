@@ -31,11 +31,17 @@ export class AverageCostStrategyClass implements StrategyInterface {
         this.adjusteData = adjusteData;
     }
 
-    private fliter(fliterData:any){
-        const result = fliterData.getResponse().then((data:any)=>{
-            console.log(this.strategyData.test);
-            console.log(data);
+    private fliter(){
+        const result = this.fliterData.getResponse().then((data:any)=>{
+            const fliterData = data.feedflow_item_crowd_rpthourlist_response.result.rpt_list.rpt_result_dto;
+            const strategy = new StrategyFuncClass(fliterData);
+            const result = strategy
+                .fliter([['campaign_id','=',1]])
+                .fliter([['click','=',0]])
+                .getResult();
+            console.log(result);
             return data;
+
         });
         return result;
     }
@@ -57,15 +63,15 @@ export class AverageCostStrategyClass implements StrategyInterface {
     // 计算的方法，返回CrowdsModifyBindAdjusterClass
     public handle():Promise<ApiInterface>{
         // 获取人群数据筛选出结果数据
-        const fliterDataResult   = this.fliter(this.fliterData);
-        // 根据筛选结果，声明更改数据的接口对象
-        const adjusterDataResult = this.adjuster(fliterDataResult);
-        adjusterDataResult.then(function (data:any) {
-            // console.log(new Date());
-            // console.log(data.httpdns_get_response.request_id);
-        })
+        const fliterDataResult   = this.fliter();
+        // // 根据筛选结果，声明更改数据的接口对象
+        // const adjusterDataResult = this.adjuster(fliterDataResult);
+        // adjusterDataResult.then(function (data:any) {
+        //     // console.log(new Date());
+        //     // console.log(data.httpdns_get_response.request_id);
+        // });
         // 请求数据
-        return adjusterDataResult;
+        return fliterDataResult;
     }
 }
 

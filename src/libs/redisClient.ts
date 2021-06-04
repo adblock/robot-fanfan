@@ -2,9 +2,10 @@ import { RedisConfig } from '../config/redis';
 import CryptoJS from 'crypto-js';
 import Redis from "ioredis";
 
-export class RedisClient {
+class Client {
     private redis:any;
-    public cache_key = 'API_CACHE'
+    public cache_key = 'API_CACHE';
+    public connected = false;
     constructor(){
         // redis 客户端
         let redisConfig:any = {
@@ -15,7 +16,12 @@ export class RedisClient {
         if(RedisConfig.password !== null){
             redisConfig.password = RedisConfig.password;
         }
-        this.redis = new Redis(redisConfig);
+        if(!this.connected){
+            console.log(1212121);
+            this.redis = new Redis(redisConfig);
+            this.connected = true;
+        }
+
     }
 
     /**
@@ -60,3 +66,4 @@ export class RedisClient {
         }
     }
 }
+export const RedisClient = new Client();

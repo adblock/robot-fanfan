@@ -14,7 +14,8 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
     public redisClient:any;
     constructor(){
         super();
-        this.redisClient = new RedisClient();
+        this.redisClient = RedisClient;
+        console.log(this.redisClient.connected);
     }
 
     // 接口名称
@@ -46,7 +47,8 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
     }
 
     // 获取请求
-    public  getResponse():any{
+    public getResponse():any{
+
         if(this.reponse === undefined){
             this.reponse = this.execute(this.request).then( async (res:any) => {
                 const data = await this.redisClient.getCache(this.request);
@@ -191,3 +193,10 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
         return this.reponse;
     }
 }
+const test = new TaobaoSimbaRtrptBidwordGetClass();
+test.setRequest({
+    campaign_id:1,
+    adgroup_id:1,
+    the_date:'2020-01-01',
+})
+test.getResponse();

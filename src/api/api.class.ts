@@ -12,7 +12,7 @@ export class ApiClass {
     public api:string = '';
     constructor(app_key:string, app_secret:string){
         // redis 客户端
-        this.redisClient = new RedisClient;
+        this.redisClient = RedisClient;
         // TOP 客户端
         this.topClient = new ApiClient({
             app_key:app_key,

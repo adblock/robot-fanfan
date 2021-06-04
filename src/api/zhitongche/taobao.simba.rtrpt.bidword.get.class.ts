@@ -50,6 +50,7 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
                 this.reponse = cache;
             }else {
                 this.reponse = await this.execute(this.request);
+                // 仿造的数据
                 this.reponse = {
                     "simba_rtrpt_bidword_get_response":{
                         "results":{

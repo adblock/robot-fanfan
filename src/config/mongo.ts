@@ -6,7 +6,7 @@ const MongoConfig = {
     database: 'mongo_database' in env ? env.mongo_database : 'zz_web',
     username: 'mongo_username' in env ? env.mongo_username : null,
     password: 'mongo_password' in env ? env.mongo_password : null,
-    auth_database: 'mongo_auth_database' in env ? env.mongo_auth_database : null,
+    auth_database: 'mongo_auth_database' in env ? env.mongo_auth_database : 'admin',
 };
 
 MongoConfig.url = `mongodb://${MongoConfig.host}:${MongoConfig.port}/${MongoConfig.database}`;
@@ -14,7 +14,7 @@ if(MongoConfig.username !== null){
     MongoConfig.url =`mongodb://${MongoConfig.username}@${MongoConfig.host}:${MongoConfig.port}/${MongoConfig.database}`;
 }
 if(MongoConfig.password !== null){
-    MongoConfig.url =`mongodb://${MongoConfig.username}:${MongoConfig.password}@${MongoConfig.host}:${MongoConfig.port}/${MongoConfig.database}`;
+    MongoConfig.url =`mongodb://${MongoConfig.username}:${MongoConfig.password}@${MongoConfig.host}:${MongoConfig.port}/${MongoConfig.database}?authMechanism=SCRAM-SHA-1&authSource=${MongoConfig.auth_database}`;
 }
 
 export {MongoConfig};

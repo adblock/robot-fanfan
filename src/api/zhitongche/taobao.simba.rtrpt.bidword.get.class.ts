@@ -8,16 +8,12 @@
 
 import { ZhitongcheApiClass } from "./zhitongche.api.class";
 import { ApiInterface } from "../api.interface";
-import { RedisClient } from "../../libs/redisClient";
+
 
 export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implements ApiInterface {
-    public redisClient:any;
     constructor(){
         super();
-        this.redisClient = RedisClient;
-        console.log(this.redisClient.connected);
     }
-
     // 接口名称
     public api = 'taobao.httpdns.get'; // taobao.simba.rtrpt.bidword.get
     // 响应参数

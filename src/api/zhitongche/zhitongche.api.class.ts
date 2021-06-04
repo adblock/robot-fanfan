@@ -10,6 +10,6 @@ import { ZhitongcheConfig } from '../../config';
 
 export class ZhitongcheApiClass extends ApiClass {
     constructor(){
-        super(ZhitongcheConfig.app_key,ZhitongcheConfig.app_secret)
+        super(ZhitongcheConfig.app_key,ZhitongcheConfig.app_secret);
     }
 }

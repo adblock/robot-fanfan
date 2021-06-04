@@ -191,10 +191,3 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
         return this.reponse;
     }
 }
-const test = new TaobaoSimbaRtrptBidwordGetClass();
-test.setRequest({
-    campaign_id:1111111111111,
-    adgroup_id:111111111111,
-    the_date:'2020-10-11',
-});
-test.getResponse();

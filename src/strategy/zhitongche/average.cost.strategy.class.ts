@@ -34,6 +34,7 @@ export class ZtcAverageCostStrategyClass implements StrategyInterface{
 
     private fliter(fliterData:any){
         const result = fliterData.getResponse().then((data:any)=>{
+            console.log(data);
             console.log(this.strategyData.test, 'testtttttt');
             console.log(data['simba_rtrpt_bidword_get_response']['results']['rt_rpt_result_entity_d_t_o']);
             console.log('aaaaaaa');

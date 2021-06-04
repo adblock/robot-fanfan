@@ -5,6 +5,7 @@ const RedisConfig = {
     port: 'redis_port' in env ? env.redis_port : 6379,
     password: 'redis_password' in env ? env.redis_password : null,
     db: 'redis_db' in env ? env.redis_db : 0,
+    default_expire: 180
 }
 
 export {RedisConfig};

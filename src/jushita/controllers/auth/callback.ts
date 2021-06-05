@@ -1,25 +1,32 @@
-// 聚石塔域名
+/**
+ * 获取授权token的控制器
+ *
+ * **/
 import { JushitaConfig } from "../../../config";
 import { TuijianApiConfig, ZhitongcheConfig } from '../../../config/api';
 import querystring from "querystring";
 import axios from "axios";
 import {Request, Response} from 'express';
-import { TokenModel } from '../../models/token'
-import * as QueryString from "querystring";
-
+import { TokenModel } from '../../models/token';
 const TOP_AUTH_URL  = 'https://oauth.taobao.com/authorize';
 const TOP_TOKEN_URL = 'https://oauth.taobao.com/token';
-
-export { tuijian, zhitongche }
-
-const Config:{[index:string]:any} = {
+const GLOBAL_CONFIG:{[index:string]:any} = {
     'tuijian':TuijianApiConfig,
-    'zhitongche':TuijianApiConfig,
+    'zhitongche':ZhitongcheConfig,
 };
 
+/**
+ * 获取token的公用方法
+ * @params type string 产品类型 tuijian 超级推荐 zhitongche 直通车
+ * @params code string 获取token的code
+ * @return {
+        getCodeUrl:string,
+        isTokenSuccess:bool,
+        tokenResultData:object,
+    }
+ * **/
 const callback = async (type:string, code:string) =>{
-    const config = Config[type];
-    // 是否获取token成功
+    const config = GLOBAL_CONFIG[type];
     let isTokenSuccess = false;
     let tokenResultData = {};
     // 获取code提交的数据
@@ -63,7 +70,12 @@ const callback = async (type:string, code:string) =>{
     }
 };
 
-// 超级推荐获取授权
+/**
+ * 授权回调的超级推荐的控制器方法
+ * @params req Request express http对象
+ * @params res Response express http对象
+ * @return void
+ * **/
 const tuijian = async (req:Request, res:Response)  => {
     let code = '';
     if(req.query.hasOwnProperty('code') && req.query.code !== undefined){
@@ -73,7 +85,12 @@ const tuijian = async (req:Request, res:Response)  => {
     res.render('auth/callback/tuijian',renderData);
 };
 
-// 直通车获取授权
+/**
+ * 授权回调的直通车的控制器方法
+ * @params req Request express http对象
+ * @params res Response express http对象
+ * @return void
+ * **/
 const zhitongche = async (req:Request, res:Response) => {
     let code = '';
     if(req.query.hasOwnProperty('code') && req.query.code !== undefined){
@@ -83,4 +100,4 @@ const zhitongche = async (req:Request, res:Response) => {
     res.render('auth/callback/zhitongche',renderData);
 };
 
-
+export { tuijian, zhitongche }

@@ -1,3 +1,8 @@
+/**
+ * redis的客户端类
+ *
+ * **/
+
 import { RedisConfig } from '../config/redis';
 import CryptoJS from 'crypto-js';
 import Redis from "ioredis";

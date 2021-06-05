@@ -10,6 +10,6 @@ const index = function (req:Request, res:Response) {
     result.then(function (data) {
         res.json(data);
     });
-}
+};
 
 export  { index }

@@ -20,7 +20,6 @@ class Client {
             this.redis = new Redis(redisConfig);
             this.connected = true;
         }
-
     }
 
     /**
@@ -29,14 +28,12 @@ class Client {
      * @params expire number 过期时间
      * @return void
      * **/
-    public async setCache(key:any,data:any,expire:number=RedisConfig.default_expire){
-        let _key = key;
-        // 判断输入的key的类型
-        if(key instanceof String){
-            _key = key ;
-        }
-        if(key instanceof Object){
+    public async setCache(key:string|object,data:any,expire:number=RedisConfig.default_expire){
+        let _key = '';
+        if(typeof key === "object") {
             _key = JSON.stringify(key);
+        }else {
+            _key = key;
         }
         _key = CryptoJS.MD5(_key).toString();
         await this.redis.set(`${this.cache_key}_${_key}`,JSON.stringify(data));
@@ -47,14 +44,12 @@ class Client {
      * @params key any 获取数据的key
      * @return any
      * **/
-    public async getCache(key:any){
-        let _key = key;
-        // 判断输入的key的类型
-        if(key instanceof String){
-            _key = key ;
-        }
-        if(key instanceof Object){
+    public async getCache(key:string|object){
+        let _key = '';
+        if(typeof key === "object"){
             _key = JSON.stringify(key);
+        }else {
+            _key = key;
         }
         _key = CryptoJS.MD5(_key).toString();
         const result = await this.redis.get(`${this.cache_key}_${_key}`);

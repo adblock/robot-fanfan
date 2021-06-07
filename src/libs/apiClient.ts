@@ -50,8 +50,9 @@ export class ApiClient {
 
 
     // 执行请求
-    public execute(method:string,params:any) {
+    public execute(method:string,params:any, session:string) {
         params.method = method;
+        params.session = session;
         const url = this.signUrl(params);
         return axios.post(url,params).then((data)=>{
             return data.data;

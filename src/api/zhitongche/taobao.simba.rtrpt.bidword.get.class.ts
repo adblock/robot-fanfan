@@ -19,12 +19,12 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
     // 响应参数
     public reponse:any | undefined;
     // 构造的数据结构
-    public request:{
-        method:string,
-        campaign_id:number,
-        adgroup_id:number,
-        the_date:String,
-    } | undefined;
+    public request = {
+        method:'',
+        campaign_id:0,
+        adgroup_id:0,
+        the_date:'',
+    };
 
     /**
      * 设置请求参数
@@ -32,7 +32,7 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
     public setRequest(request:{
         campaign_id:number,
         adgroup_id:number,
-        the_date:String,
+        the_date:string,
     }):void {
         this.request ={
             method: this.api,
@@ -44,7 +44,7 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
 
     // 获取请求
     public async getResponse(){
-        if(this.reponse === undefined){
+        if(this.reponse.method !== ''){
             const cache = await this.redisClient.getCache(this.request);
             if(cache){
                 this.reponse = cache;

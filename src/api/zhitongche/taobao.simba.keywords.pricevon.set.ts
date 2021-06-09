@@ -9,33 +9,30 @@ import { ZhitongcheApiClass } from "./zhitongche.api.class";
 import { ApiInterface } from "../api.interface";
 
 export class TaobaoSimbaKeywordsPricevonSet extends ZhitongcheApiClass implements ApiInterface{
-    constructor(){
+    constructor(request:{
+        keywordid_prices:string,
+    }, wangwang:string){
         super();
+        this.request = request;
+        this.wangwang = wangwang;
     }
+
+    // 请求此接口的参数变量
+    public request;
+
+    // 店铺wangwang
+    public wangwang;
+
     // 接口名称
     public api = 'taobao.httpdns.get'; // taobao.simba.keywords.pricevon.set
+
     // 响应参数
     public reponse:any | undefined;
-    // 构造的数据结构
-    public request:{
-        keywordid_prices:String,
-    } | undefined;
-
-    /**
-     * 设置请求参数
-     */
-    public setRequest(request:{
-        keywordid_prices:String,
-    }):void {
-        console.log('setRequest');
-    }
 
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.execute({test:11111}).then(function (res:any) {
-                // console.log('1--------------------------------------');
-                // console.log(res);
+            this.reponse = this.execute(this.request, this.wangwang).then(function (res:any) {
                 res = {
                     "simba_keywords_pricevon_set_response":{
                         "keywords":{
@@ -63,7 +60,7 @@ export class TaobaoSimbaKeywordsPricevonSet extends ZhitongcheApiClass implement
                 };
                 return res;
             }).catch(data=>{
-                console.log(data.code,'11111111111');
+                console.log(data.code);
             });
         }
         return this.reponse;

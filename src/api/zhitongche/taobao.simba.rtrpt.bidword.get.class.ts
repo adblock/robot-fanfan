@@ -11,36 +11,28 @@ import { ApiInterface } from "../api.interface";
 
 
 export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implements ApiInterface {
-    constructor(){
-        super();
-    }
-    // 接口名称
-    public api = 'taobao.httpdns.get'; // taobao.simba.rtrpt.bidword.get
-    // 响应参数
-    public reponse:any | undefined;
-    // 构造的数据结构
-    public request = {
-        method:'',
-        campaign_id:0,
-        adgroup_id:0,
-        the_date:'',
-    };
-
-    /**
-     * 设置请求参数
-     */
-    public setRequest(request:{
+    constructor(request:{
+        method:string,
         campaign_id:number,
         adgroup_id:number,
         the_date:string,
-    }):void {
-        this.request ={
-            method: this.api,
-            campaign_id:request.campaign_id,
-            adgroup_id:request.adgroup_id,
-            the_date:request.the_date,
-        }
+    }, wangwang:string){
+        super();
+        this.request = request;
+        this.wangwang = wangwang;
     }
+
+    // 请求此接口的参数变量
+    public request;
+
+    // 店铺wangwang
+    public wangwang;
+
+    // 接口名称
+    public api = 'taobao.httpdns.get'; // taobao.simba.rtrpt.bidword.get
+
+    // 响应参数
+    public reponse:any | undefined;
 
     // 获取请求
     public async getResponse(){
@@ -49,7 +41,7 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
             if(cache){
                 this.reponse = cache;
             }else {
-                this.reponse = await this.execute(this.request);
+                this.reponse = await this.execute(this.request, this.wangwang);
                 // 仿造的数据
                 this.reponse = {
                     "simba_rtrpt_bidword_get_response":{

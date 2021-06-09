@@ -10,41 +10,34 @@ import { ApiInterface } from "../api.interface";
 import {TuijianApiClass} from "./tuijian.api.class";
 
 export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass implements ApiInterface {
-    constructor(){
+    constructor(request:{
+        campaign_id:number,
+        end_hour_id:number,
+        adgroup_id:number,
+        crowd_id:number,
+        log_date:string,
+        start_hour_id:number,
+    }, wangwang:string){
         super();
+        this.request = request;
+        this.wangwang = wangwang;
     }
+    // 请求此接口的参数变量
+    public request;
+
+    // 店铺wangwang
+    public wangwang;
+
     // 接口名称
     public api = 'taobao.httpdns.get'; // taobao.feedflow.item.crowd.rpthourlist
+
     // 响应参数
     public reponse:any | undefined;
-    // 构造的数据结构
-    public request:{
-        campaign_id:number,
-        end_hour_id:number,
-        adgroup_id:number,
-        crowd_id:number,
-        log_date:string,
-        start_hour_id:number,
-    } | undefined;
 
-    /**
-     * 设置请求参数
-     */
-    public setRequest(request:{
-        campaign_id:number,
-        end_hour_id:number,
-        adgroup_id:number,
-        crowd_id:number,
-        log_date:string,
-        start_hour_id:number,
-    }):void {
-        console.log('setRequest');
-    }
-    
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.execute({test:11111}).then(function (res) {
+            this.reponse = this.execute(this.request, this.wangwang).then(function (res) {
                 res = {
                     "feedflow_item_crowd_rpthourlist_response":{
                         "result":{

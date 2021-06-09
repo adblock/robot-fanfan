@@ -19,7 +19,7 @@ export class ApiClient {
     }
 
     // 计算签名
-     private signUrl(params:any){
+     private signUrl(params:any, session:string=''){
         // 接口参数
         let args:any = {
             timestamp:format(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -28,6 +28,10 @@ export class ApiClient {
             v: '2.0',
             sign_method: 'md5',
         };
+        if(session !== ''){
+            args.session = session;
+        }
+        console.log(args);
         for (var key in params) {
             if(typeof params[key] === 'object'){
                 args[key] = JSON.stringify(params[key]);
@@ -50,10 +54,9 @@ export class ApiClient {
 
 
     // 执行请求
-    public execute(method:string,params:any, session:string) {
+    public execute(method:string, params:any, session:string) {
         params.method = method;
-        params.session = session;
-        const url = this.signUrl(params);
+        const url = this.signUrl(params, session);
         return axios.post(url,params).then((data)=>{
             return data.data;
         }).catch(data=>{

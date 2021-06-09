@@ -23,7 +23,9 @@ export class ApiClass {
      * 发送请求的方法
      * @params params any 参数
      * **/
-    public execute(params:any){
-        return this.topClient.execute(this.api, params);
+    public execute(params:any, wangwang:string){
+        // todo 开发一session 先默认为超级女声琳琳
+        let session = '6202806718a2bbdfc4f61fd525e4b0c58506e7709225de026151499';
+        return this.topClient.execute(this.api, params, session);
     }
 }

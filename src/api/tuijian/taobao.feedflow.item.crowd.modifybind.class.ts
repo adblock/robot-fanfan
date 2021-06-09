@@ -10,55 +10,35 @@ import { ApiInterface } from "../api.interface";
 import {TuijianApiClass} from "./tuijian.api.class";
 
 export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass implements ApiInterface {
-    constructor(){
-        super();
-    }
-    // 接口名称
-    public api = 'taobao.httpdns.get'; //taobao.feedflow.item.crowd.modifybind
-    // 响应参数
-    public reponse:any | undefined;
-    // 构造的数据结构
-    public request:{
+    constructor(request:{
         crowds: {
             price:number,
             status:string,
             crowd_id:number,
         }[];
         adgroup_id: number;
-    } | undefined;
-
-    /**
-     * 构造数据接受参数的方法
-     * price      定向价格
-     * status     定向状态
-     * crowd_id   定向id
-     * adgroup_id 单元id
-     * **/
-    public setRequest(params:{price:number, status:string, crowd_id:number, adgroup_id:number}):void {
-        if(this.request === undefined){
-            this.request = {
-                crowds:[
-                    {
-                        price: params.price,
-                        status: params.status,
-                        crowd_id: params.crowd_id,
-                    }
-                ],
-                adgroup_id: params.adgroup_id,
-            }
-        }else{
-            this.request.crowds.push({
-                price:0,
-                status:'start',
-                crowd_id:0,
-            });
-        }
+    },wangwang:string){
+        super();
+        this.request = request;
+        this.wangwang = wangwang;
     }
+
+    // 请求此接口的参数变量
+    public request;
+
+    // 店铺wangwang
+    public wangwang;
+
+    // 接口名称
+    public api = 'taobao.httpdns.get'; //taobao.feedflow.item.crowd.modifybind
+
+    // 响应参数
+    public reponse:any | undefined;
 
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.execute({seesion:12121212121}).then(function (res) {
+            this.reponse = this.execute(this.request,this.wangwang).then(function (res) {
                 // console.log('2--------------------------------------');
                 // console.log(res);
                 return res;

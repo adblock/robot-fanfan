@@ -11,10 +11,7 @@ import { StrategyInterface } from '../strategy.interface';
 import { ApiInterface } from '../../api/api.interface';
 import { TaobaoFeedflowItemCrowdModifyBindClass, TaobaoFeedflowItemCrowdRpthourlistClass } from '../../api';
 import _ from 'lodash';
-import { count } from 'console';
 import { TaobaoFeedflowItemCrowdPageClass } from '../../api/tuijian/taobao.feedflow.item.crowd.page';
-import { config } from 'process';
-import { arMA } from 'date-fns/locale';
 
 export class AverageCostStrategyClass implements StrategyInterface {
     // 策略的常量数据

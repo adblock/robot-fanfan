@@ -4,13 +4,17 @@
  **/
 import { ApiClient } from '../libs/apiClient';
 import { RedisClient } from '../libs/redisClient';
+import { mongoClient } from '../libs/mongoClient';
 
 
 export class ApiClass {
     public topClient;
     public redisClient;
+    public mongoClient;
     public api:string = '';
     constructor(app_key:string, app_secret:string){
+        // mongo 客户端
+        this.mongoClient = mongoClient;
         // redis 客户端
         this.redisClient = RedisClient;
         // TOP 客户端
@@ -29,3 +33,4 @@ export class ApiClass {
         return this.topClient.execute(this.api, params, session);
     }
 }
+

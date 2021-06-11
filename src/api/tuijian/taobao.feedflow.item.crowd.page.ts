@@ -14,9 +14,14 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
         crowd_query: {
             adgroup_id:number,
             crowd_id:number,
+            status_list ?: string[] //TODO 在调用的地方定义 此处去掉
         }[];  
     }, wangwang:string){
         super();
+        request.crowd_query.forEach((value,key,crowd_query) => {
+            request.crowd_query[key].status_list = ['start'] //TODO循环条件为投放中，其实可以加在调用地方的构造上
+        })
+        request.crowd_query[0].status_list = ['start'];
         this.request = request;
         this.wangwang = wangwang;
     }

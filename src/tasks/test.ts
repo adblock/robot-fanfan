@@ -17,6 +17,8 @@ import { AverageCostStrategyClass } from '../strategy/tuijian/average.cost.strat
 //         }[];
 //     },wangwangid:string
 // }
+
+//TODO 此处为用户传入数据，应该没有这么多参数，暂时假设 
 const strategyData  =  { 
     request :  {
         campaign_id:2,
@@ -38,7 +40,7 @@ const strategyData  =  {
         }],
     },
     wangwangid:'string',
-    total_budget:1000 //单位是元
+    total_budget:230000 //单位是分
 }
 
 for (let i = 0; i < 1; i++) {

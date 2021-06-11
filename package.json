@@ -21,6 +21,7 @@
     "express": "^4.17.1",
     "ioredis": "^4.27.4",
     "lodash": "^4.17.21",
+    "mongodb": "^3.6.9",
     "mongoose": "^5.12.12",
     "querystring": "^0.2.1",
     "typescript": "^4.2.4"

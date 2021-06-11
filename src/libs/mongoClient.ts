@@ -1,7 +1,7 @@
 /*
 @File     ：mongoClient.py
 @Author   ：qingyang
-@Date     ：2021/6/8 14:35 
+@Date     ：2021/6/8 14:35
 @describe ：mongo的客户端类
 */
 import { MongoConfig } from "../config/mongo";
@@ -17,19 +17,24 @@ class Client {
         console.log('constructor');
     }
 
-    conn = async() =>{
+    async getDB(databaseName:string=MongoConfig.database){
         if(!this.connected) {
             this.client = await MongoClient.connect(MongoConfig.url, {useUnifiedTopology:true});
-            this.database = this.client.db('zz_web');
+            this.database = this.client.db(databaseName);
             this.connected = true;
+            return this.database;
         }
-    } ;
+        if(this.client !== undefined && this.connected) {
+            this.database = this.client.db(databaseName);
+            return this.database;
+        }
+    };
 
-    mongoClose = async() => {
+    async mongoClose(){
         if(this.client){
             await this.client.close();
         }
     };
 }
-
-export const mongoClient = new Client();
+const mongoClient = new Client();
+export { mongoClient };

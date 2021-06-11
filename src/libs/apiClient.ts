@@ -31,7 +31,6 @@ export class ApiClient {
         if(session !== ''){
             args.session = session;
         }
-        console.log(args);
         for (var key in params) {
             if(typeof params[key] === 'object'){
                 args[key] = JSON.stringify(params[key]);

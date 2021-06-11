@@ -1,16 +1,53 @@
 import { AverageCostStrategyClass } from '../strategy/tuijian/average.cost.strategy.class';
-import { TaobaoFeedflowItemCrowdModifyBindClass,TaobaoFeedflowItemCrowdRpthourlistClass } from '../api'
+// import { TaobaoFeedflowItemCrowdModifyBindClass,TaobaoFeedflowItemCrowdRpthourlistClass } from '../api'
 
 
-
-
+// const strategyData : { 
+//     request: {
+//         campaign_id:number,
+//         end_hour_id:number,
+//         adgroup_id:number,
+//         crowd_id:number,
+//         log_date:string,
+//         start_hour_id:number,
+//         crowds: {
+//             price:number,
+//             status:string,
+//             crowd_id:number,
+//         }[];
+//     },wangwangid:string
+// }
+const strategyData  =  { 
+    request :  {
+        campaign_id:2,
+        end_hour_id:2,
+        adgroup_id:2,
+        crowd_id:2,
+        log_date:'string',
+        start_hour_id:2,
+        crowds: [
+            {
+                price:1,
+                status:'string',
+                crowd_id:2,
+            }
+        ],
+        crowd_query: [{
+            adgroup_id:2,
+            crowd_id:2,
+        }],
+    },
+    wangwangid:'string',
+    total_budget:1000 //单位是元
+}
 
 for (let i = 0; i < 1; i++) {
     console.log(i,new Date(),'----------------------------------------------');
     const averageCostStrategy = new AverageCostStrategyClass(
-        {test:i},
-        new TaobaoFeedflowItemCrowdRpthourlistClass,
-        new TaobaoFeedflowItemCrowdModifyBindClass,
+        strategyData
+        // {test:i},
+        // new TaobaoFeedflowItemCrowdRpthourlistClass,
+        // new TaobaoFeedflowItemCrowdModifyBindClass,
     );
     averageCostStrategy.handle();
 }

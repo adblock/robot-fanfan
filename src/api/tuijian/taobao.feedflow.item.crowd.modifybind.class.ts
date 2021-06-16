@@ -10,18 +10,26 @@ import { ApiInterface } from "../api.interface";
 import {TuijianApiClass} from "./tuijian.api.class";
 
 export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass implements ApiInterface {
-    constructor(request:{
-        crowds: {
-            price:number,
-            status:string,
-            crowd_id:number,
-        }[];
-        adgroup_id: number;
-    },wangwang:string){
+    constructor(
+        request:{
+            crowds: {
+                price:number,
+                status:string,
+                crowd_id:number,
+            }[];
+            adgroup_id: number;
+        },
+        wangwang:string,
+        // last_charge:string
+    ){
         super();
         this.request = request;
         this.wangwang = wangwang;
+        // this.last_charge = last_charge;
     }
+
+    //记录上次花费（实际为当前花费）
+    // public last_charge;
 
     // 请求此接口的参数变量
     public request;
@@ -36,7 +44,7 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass impl
     public reponse:any | undefined;
 
     // 获取请求
-    public getResponse():any{
+    public async getResponse(){
         if(this.reponse === undefined){
             this.reponse = this.execute(this.request,this.wangwang).then(function (res) {
                 // console.log('2--------------------------------------');
@@ -45,15 +53,18 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass impl
                     "feedflow_item_crowd_modifybind_response":{
                         "result":{
                             "message":"成功",
-                            "success":false
+                            "success":'success'
                         }
                     }
                 }
+                
+
                 return res;
             }).catch(data=>{
                 console.log(data.code,'11111111');
             });
         }
+        
         return this.reponse;
     }
 }

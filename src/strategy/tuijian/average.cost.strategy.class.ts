@@ -12,31 +12,26 @@ import { ApiInterface } from '../../api/api.interface';
 import { TaobaoFeedflowItemCrowdModifyBindClass, TaobaoFeedflowItemCrowdRpthourlistClass } from '../../api';
 import _ from 'lodash';
 import { TaobaoFeedflowItemCrowdPageClass } from '../../api/tuijian/taobao.feedflow.item.crowd.page';
+import {format,subMinutes} from 'date-fns';
+import { mongoClient } from '../../libs/mongoClient'
 
 export class AverageCostStrategyClass implements StrategyInterface {
     // 策略的常量数据
     public strategyData:any | {};
 
+    /**
+     * 构造查询参数
+     * @param strategyData 用户传入数据
+     */
     constructor(
         // 此处的参数没有这么多，//TODO 有些参数后续需要计算
         strategyData : { 
-            request: {
-                campaign_id:number,
-                end_hour_id:number,
-                adgroup_id:number,
-                crowd_id:number,
-                log_date:string,
-                start_hour_id:number, 
-                crowds: {
-                    price:number,
-                    status:string,
-                    crowd_id:number,
-                }[],
-                crowd_query: {
-                    adgroup_id:number,
-                    crowd_id:number,
-                }[],
-            },wangwangid:string,
+            campaign_id:number,
+            adgroup_id:number,
+            start_hour_id:number, 
+            end_hour_id:number,
+            log_date:string,
+            wangwangid:string,
             total_budget:number,//总预算
         }
     ){
@@ -49,9 +44,18 @@ export class AverageCostStrategyClass implements StrategyInterface {
      * @returns 
      */
     private fliter(){
+        //拼凑查询数据
+        let requestData = {
+            campaign_id : this.strategyData.campaign_id,
+            end_hour_id : this.strategyData.end_hour_id,
+            adgroup_id : this.strategyData.adgroup_id,
+            log_date : this.strategyData.log_date,
+            start_hour_id : this.strategyData.start_hour_id,
+        }
         //实例化广告主定向分时数据查询
-        const fliterData = new TaobaoFeedflowItemCrowdRpthourlistClass(this.strategyData.request,this.strategyData.wangwangid);
-
+        const fliterData = new TaobaoFeedflowItemCrowdRpthourlistClass(requestData,this.strategyData.wangwangid);
+        
+        //获取数据
         const result = fliterData.getResponse().then((data:any)=>{
             const fliterData = data.feedflow_item_crowd_rpthourlist_response.result.rpt_list.rpt_result_dto;
             const strategy = new StrategyFuncClass(fliterData);
@@ -59,8 +63,6 @@ export class AverageCostStrategyClass implements StrategyInterface {
                 .fliter([['campaign_id','=',1]])
                 .fliter([['click','=',2]])
                 .getResult();
-             
-            // console.log(result)
 
             return result;
         });
@@ -72,8 +74,18 @@ export class AverageCostStrategyClass implements StrategyInterface {
      * @returns 
      */
     private async crowdPage() {
+        //拼接查询参数
+        let requestData = {
+            crowd_query : [
+                {
+                    adgroup_id: this.strategyData.adgroup_id,
+                    status_list : ['start'] //只获取投放中的的
+                }
+            ]
+        }
+    
         // 批量获取人群出价
-        const crowdPageData = new TaobaoFeedflowItemCrowdPageClass(this.strategyData.request,this.strategyData.wangwangid);
+        const crowdPageData = new TaobaoFeedflowItemCrowdPageClass(requestData,this.strategyData.wangwangid);
         //同步获取数据，为了给下面的数据赋予人群id的键
         const crowdPageResult = await crowdPageData.getResponse();
         const dataResult = crowdPageResult.feedflow_item_crowd_page_response.result.crowds.crowd_dto;
@@ -82,27 +94,11 @@ export class AverageCostStrategyClass implements StrategyInterface {
         return result;
     }
 
-
-    public zhushi():void{
-        //这里是思路
-        //预算、计划->人群、消耗、时间 、
-        /**
-         * 需求：单位时间内将预算均匀花出
-         * 实现：
-         *      1、
-         *      2、
-         * 
-         * 假设：
-         *      有10个人群，早上7点第一次跑，总预算1000块，假设0-7点没有任何消耗
-         *      所以每个人群一天的平均花费是100块，则每十分钟是100/24/6 = 0.64
-         *      7-8点之间，有5个人群没有消耗,有三个人群消耗2.5元，有一个人群消耗50元，有一个人群消耗110元
-         * 问题：
-         *      8点跑的时候，该怎么算？如何防止超出花费？
-         */
-
-    }
-
-
+    /**
+     * 数据处理并修改数据
+     * @param fliterDataResult 获取到的计划下的人群数据
+     * @returns 
+     */
     private async adjuster (fliterDataResult:any){
         //计算数据看是否需要更改
         const result =  fliterDataResult.then(async (fliterData:any)=>{
@@ -111,70 +107,120 @@ export class AverageCostStrategyClass implements StrategyInterface {
             const fliterDataCount = 10; 
             // 计算人群平均花费 = 总预算/人群数量 //TODO 上传的total_budget单位待确认（暂定为分）
             const crowdAverageCost = _.round(_.divide(this.strategyData.total_budget, fliterDataCount),2);
-            // 批量获取人群出价
+            // 批量同步获取人群出价
             const crowdPageResult = await this.crowdPage();
-            // 定义一个最终返回的数组
+
+            // 定义一个最终返回的结果数组
             let endResult:any[] = [];
+
+            //定义最后需要修改的数据数组
+            let request : {
+                crowds : any[],
+                adgroup_id : number,
+            } = {
+                crowds : [],
+                adgroup_id : this.strategyData.adgroup_id,
+            }
+
+            // 定义存入mongo的数组
+            let mongoData:any[] = [];
+
+            //实例化mongo连接
+            let mongoClientInstance = mongoClient; 
+            await mongoClientInstance.getDB();
+
+            //获取上次或过去某个时间点的数据
+            let last_charge_arr = await mongoClientInstance.database.collection('ddd_test').find({
+                // adgroup_id : this.strategyData.adgroup_id,// TODO 人群
+                wangwangid : this.strategyData.wangwangid,//旺旺
+                // date_minute : format(subMinutes(new Date(), 2), 'yyyy-MM-dd hh:mm') // TODO 过去某个时间点
+            }).toArray();
+            // 根据人群id赋予键
+            last_charge_arr = _.keyBy(last_charge_arr, 'crowd_id');
 
             // 循环判断人群花费是否超额
             fliterData.forEach( (filter:any,key:number,fliterData:[])=>{
                 if(!(filter.crowd_id in crowdPageResult)){
                     //如果没有当前人群的出价，说明是非投放中，则不作处理
-                    //定义没有数据时的promise对象
-                    let erro = new Promise((resolve, reject) => {
-                        resolve(
-                            {
-                                feedflow_item_crowd_modifybind_response: 
-                                { result: 
-                                    {
-                                        mseage: '人群未投放',
-                                        error: false
-                                    } 
-                                } 
-                            }
-                        );
-                    });
-
-                    // 压入数组 return跳出循环
-                    return endResult.unshift(erro);
+                   return; //return 跳出当次循环
                 }
                
                 let  price:number = 0;  // 定义初始出价
                 let  status:string = 'start'; // 定义初始状态
                 let  price_range:number = 0.02; // 调价幅度，相当于百分之二
-                let  last_charge:number = 100; // TODO 上次花费 需要查询数据库 ，单位此处暂时假设为元
+                let  last_charge = last_charge_arr.hasOwnProperty(filter.crowd_id) ? last_charge_arr[filter.crowd_id].last_charge : '0' ;//上次花费 ，单位为元
 
-                //消耗单位是元，上次消耗为元 当前出价为分，平均出价为元，最终出价为分
+                //消耗单位是元，上次消耗为元 当前出价为分，平均出价为分，最终出价为分
                 if(filter.charge*100 > crowdAverageCost){
                     //消耗大于日限均值,直接暂停
-                    status = 'pause'; //接口未体现，可能是其他的
+                    status = 'pause'; //接口未体现暂停时pause，可能是其他的
                     price = crowdPageResult[filter.crowd_id].price;//出价不变 
                 }else{
                     //消耗小于人群平均日限
                     if(filter.charge > last_charge){
-                        //当前时刻较上次（也可能是过去的某个时间点）消耗未变,出价上调
-                        price = _.multiply(crowdPageResult[filter.crowd_id].price, (1 + price_range)); 
-                    }else{
                         //当前时刻较上次（也可能是过去的某个时间点）消耗上升,出价不变
                         price = crowdPageResult[filter.crowd_id].price;//出价不变   
+                    }else{
+                        //当前时刻较上次（也可能是过去的某个时间点）消耗未变,出价上调
+                        price = _.multiply(crowdPageResult[filter.crowd_id].price, (1 + price_range)); 
                     }
-                    
                 }
+
                 //拼凑需要修改的数据
-                let request = {
-                    crowds: [{
-                        price : price ,
-                        status : status,
-                        crowd_id : filter.crowd_id,
-                    }],
-                    adgroup_id: 1
+                let tmpRequest = {
+                    price : price ,
+                    status : status,
+                    crowd_id : filter.crowd_id,
                 }
-                //修改数据
+                //将拼凑的数据压入最终数组
+                request.crowds.unshift(tmpRequest);
+                
+                //拼凑需要存入mongo的数据
+                let tmpMongo = {
+                    crowd_id : filter.crowd_id,
+                    last_charge : filter.charge, //当作上次花费
+                    adgroup_id : this.strategyData.adgroup_id,
+                    wangwangid : this.strategyData.wangwangid,
+                    date_minute : format(new Date(), 'yyyy-MM-dd hh:mm'), //上次操作时间 精确到分钟
+                    status : status, //保存好状态，以后查询可能用到
+                    last_price: price // 当作上次出价 （可能不需要，因为会查询淘宝api）
+                }
+                //将拼凑的数据压入最终数组
+                mongoData.unshift(tmpMongo);
+            });
+
+            if(request.crowds.length){
+                //有数据、修改数据
                 const adjusterData = new TaobaoFeedflowItemCrowdModifyBindClass(request,this.strategyData.wangwangid);
                 const adjusterResult = adjusterData.getResponse();
                 //结果压入数组
-                return endResult.unshift(adjusterResult);
-            });
+                endResult.unshift(adjusterResult);
+            }else{
+                //没有数据，定义没有数据时的promise对象
+                let erro = new Promise((resolve, reject) => {
+                    resolve(
+                        {
+                            feedflow_item_crowd_modifybind_response: 
+                            { result: 
+                                {
+                                    mseage: '人群未投放',
+                                    error: false
+                                } 
+                            } 
+                        }
+                    );
+                });
+                // 压入数组
+                endResult.unshift(erro);
+            }
+
+            if(mongoData.length > 0){
+                //此处将人群id，当前消耗、推广组id，旺旺id、时间（年月日时分）存入mongo
+                //批量 插入数据
+                await mongoClientInstance.database.collection('ddd_test').insertMany(mongoData)
+                await mongoClientInstance.mongoClose()
+            }
+
             // 返回结果
             return endResult;
         });        
@@ -193,16 +239,16 @@ export class AverageCostStrategyClass implements StrategyInterface {
                 console.log('数据不满足条件不做处理');
             }else{
                 const adjusterDataResult = this.adjuster(fliterDataResult);
-        //         adjusterDataResult.then((adjusterData:any)=>{
-        //             // console.log(adjusterData)
-        //             adjusterData.every((adjusterValue:any,adjusterKey:number,adjusterData:[])=>{
-        //                 adjusterValue.then(function(data:any){
-        //                     console.log(data);
-        //                 })
-        //                 // console.log(adjusterValue)
-        //                 return true;
-        //             })
-        //         })
+                adjusterDataResult.then((adjusterData:any)=>{
+                    //TODO 打印结果 此处可以删掉
+                    adjusterData.every((adjusterValue:any,adjusterKey:number,adjusterData:[])=>{
+                        adjusterValue.then(function(data:any){
+                            console.log(data);
+                        })
+                        //需要返回true以让循环继续执行
+                        return true; 
+                    })
+                })
             }
         })
         // return fliterDataResult;

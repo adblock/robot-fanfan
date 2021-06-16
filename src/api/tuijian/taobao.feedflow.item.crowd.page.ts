@@ -13,15 +13,10 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
     constructor(request:{
         crowd_query: {
             adgroup_id:number,
-            crowd_id:number,
-            status_list ?: string[] //TODO 在调用的地方定义 此处去掉
+            status_list:string[]
         }[];  
     }, wangwang:string){
         super();
-        request.crowd_query.forEach((value,key,crowd_query) => {
-            request.crowd_query[key].status_list = ['start'] //TODO循环条件为投放中，其实可以加在调用地方的构造上
-        })
-        request.crowd_query[0].status_list = ['start'];
         this.request = request;
         this.wangwang = wangwang;
     }
@@ -50,8 +45,34 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
                             "message":"message",
                             "crowds":{
                                 "crowd_dto":[
+                                    // {
+                                    //     "crowd_id":123,
+                                    //     "crowd_name":"test",
+                                    //     "crowd_desc":"test",
+                                    //     "price":100,
+                                    //     "campaign_id":1,
+                                    //     "adgroup_id":1,
+                                    //     "status":"pause",
+                                    //     "target_label":{
+                                    //         "label_id":1,
+                                    //         "target_id":1,
+                                    //         "target_type":"ITEM_RECOMMEND",
+                                    //         "label_name":"test",
+                                    //         "label_desc":"test",
+                                    //         "label_value":"ALL",
+                                    //         "options":{
+                                    //             "option_dto":[
+                                    //                 {
+                                    //                     "option_name":"test",
+                                    //                     "option_value":"ALL",
+                                    //                     "option_desc":"test"
+                                    //                 }
+                                    //             ]
+                                    //         }
+                                    //     }
+                                    // },
                                     {
-                                        "crowd_id":123,
+                                        "crowd_id":456,
                                         "crowd_name":"test",
                                         "crowd_desc":"test",
                                         "price":100,
@@ -77,8 +98,8 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
                                         }
                                     },
                                     {
-                                        "crowd_id":456,
-                                        "crowd_name":"test",
+                                        "crowd_id":789,
+                                        "crowd_name":"test3",
                                         "crowd_desc":"test",
                                         "price":100,
                                         "campaign_id":1,

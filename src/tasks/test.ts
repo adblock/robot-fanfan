@@ -1,4 +1,5 @@
 import { AverageCostStrategyClass } from '../strategy/tuijian/average.cost.strategy.class';
+import  format from 'date-fns/format';
 // import { TaobaoFeedflowItemCrowdModifyBindClass,TaobaoFeedflowItemCrowdRpthourlistClass } from '../api'
 
 
@@ -19,27 +20,14 @@ import { AverageCostStrategyClass } from '../strategy/tuijian/average.cost.strat
 // }
 
 //TODO 此处为用户传入数据，应该没有这么多参数，暂时假设 
+
 const strategyData  =  { 
-    request :  {
-        campaign_id:2,
-        end_hour_id:2,
-        adgroup_id:2,
-        crowd_id:2,
-        log_date:'string',
-        start_hour_id:2,
-        crowds: [
-            {
-                price:1,
-                status:'string',
-                crowd_id:2,
-            }
-        ],
-        crowd_query: [{
-            adgroup_id:2,
-            crowd_id:2,
-        }],
-    },
-    wangwangid:'string',
+    campaign_id:2,
+    end_hour_id:2,
+    adgroup_id:2,
+    log_date:format(new Date(), 'yyyy-MM-dd'),
+    start_hour_id:2,
+    wangwangid:'这是个测试',
     total_budget:230000 //单位是分
 }
 

@@ -28,7 +28,7 @@ const strategyData  =  {
     log_date:format(new Date(), 'yyyy-MM-dd'),
     start_hour_id:2,
     wangwangid:'这是个测试',
-    total_budget:230000 //单位是分
+    total_budget:230000 //单位是分test
 }
 
 for (let i = 0; i < 1; i++) {

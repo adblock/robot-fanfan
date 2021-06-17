@@ -12,7 +12,6 @@ import { ApiInterface } from "../api.interface";
 
 export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implements ApiInterface {
     constructor(request:{
-        method:string,
         campaign_id:number,
         adgroup_id:number,
         the_date:string,
@@ -36,7 +35,7 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
 
     // 获取请求
     public async getResponse(){
-        if(this.reponse.method !== ''){
+        if(this.reponse === undefined){
             const cache = await this.redisClient.getCache(this.request);
             if(cache){
                 this.reponse = cache;

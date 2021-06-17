@@ -82,7 +82,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
      * 获取单品单元下人群列表，只获取投放中的
      * @returns
      */
-    private async getLastCharge(crowd_id_arr:any[]) {
+    private async getLastCharge(crowd_id_arr:number[]) {
         //实例化mongo连接
         let mongoClientInstance = mongoClient;
         await mongoClientInstance.getDB();
@@ -121,10 +121,10 @@ export class AverageCostStrategyClass implements StrategyInterface {
      * @returns 
      */
     private async adjuster (){
-        const RptDataResult = await this.getRptData(); // 人群实时数据
+        const rptDataResult = await this.getRptData(); // 人群实时数据
         const crowdPageResult = await this.crowdPage(); // 人群出价
         const lastChargeResult = await this.getLastCharge(_.map(_.keys(crowdPageResult), _.parseInt)); // 人群存储在mongo中的最后一次出价
-        const crowdAverageCost = _.round(_.divide(this.strategyData.total_budget, RptDataResult.length),2); // 计算人群平均花费 = 总预算/人群数量 //TODO 上传的total_budget单位待确认（暂定为分）
+        const crowdAverageCost = _.round(_.divide(this.strategyData.total_budget, rptDataResult.length),2); // 计算人群平均花费 = 总预算/人群数量 //TODO 上传的total_budget单位待确认（暂定为分）
 
         // 修改人群出价接口需要的数据
         let crowdModifyRequest:{
@@ -142,7 +142,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
         let mongoData:any[] = [];
 
         // 循环人群实时数据
-        RptDataResult.forEach( (filter:any)=>{
+        rptDataResult.forEach( (filter:any)=>{
             if(!(filter.crowd_id in crowdPageResult)){
                 //如果没有当前人群的出价，说明是非投放中，则不作处理
                 return; //return 跳出当次循环
@@ -150,7 +150,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
             let  price = 0.05;  // 定义初始出价
             let  status = 'start'; // 定义初始状态
             let  price_range = 0.02; // 调价幅度，相当于百分之二
-            let  last_charge = lastChargeResult.hasOwnProperty(filter.crowd_id) ? lastChargeResult[filter.crowd_id].last_charge : '0' ;//上次花费 ，单位为元
+            let  last_charge = lastChargeResult.hasOwnProperty(filter.crowd_id) ? lastChargeResult[filter.crowd_id].last_charge : '0'; //上次花费 ，单位为元
 
             //消耗单位是元，上次消耗为元 当前出价为分，平均出价为分，最终出价为分
             if(filter.charge*100 > crowdAverageCost){
@@ -159,18 +159,18 @@ export class AverageCostStrategyClass implements StrategyInterface {
                 price = crowdPageResult[filter.crowd_id].price;//出价不变
             }else{
                 let last_date_minute = lastChargeResult.hasOwnProperty(filter.crowd_id) ? lastChargeResult[filter.crowd_id].date_minute : "1970-01-01 00:00"; //上次修改时间
-                let ten_before_minute = format(subMinutes(new Date(), 10), 'yyyy-MM-dd HH:mm'); //过去十分钟的时间点
+                let ten_before_minute = format(subMinutes(new Date(), this.theLastAdjusterDiffTime), 'yyyy-MM-dd HH:mm'); //过去十分钟的时间点
                 if(last_date_minute > ten_before_minute){ //本次时间与上次修改时间不满十分钟
                     return;//未满10分钟 return 跳出当次循环
-                }
-
-                //消耗小于人群平均日限
-                if(filter.charge > last_charge){
-                    //当前时刻较上次（也可能是过去的某个时间点）消耗上升,出价不变
-                    price = crowdPageResult[filter.crowd_id].price;//出价不变
                 }else{
-                    //当前时刻较上次（也可能是过去的某个时间点）消耗未变,出价上调
-                    price = _.multiply(crowdPageResult[filter.crowd_id].price, (1 + price_range));
+                    //消耗小于人群平均日限
+                    if(filter.charge > last_charge){
+                        //当前时刻较上次（也可能是过去的某个时间点）消耗上升,出价不变
+                        price = crowdPageResult[filter.crowd_id].price;//出价不变
+                    }else{
+                        //当前时刻较上次（也可能是过去的某个时间点）消耗未变,出价上调
+                        price = _.multiply(crowdPageResult[filter.crowd_id].price, (1 + price_range));
+                    }
                 }
             }
             //将拼凑的数据压入最终数组
@@ -202,8 +202,8 @@ export class AverageCostStrategyClass implements StrategyInterface {
             await mongoClientInstance.getDB();
             //此处将人群id，当前消耗、推广组id，旺旺id、时间（年月日时分）存入mongo
             //批量 插入数据
-            await mongoClientInstance.database.collection(this.mongoLogsCollections).insertMany(mongoData)
-            await mongoClientInstance.mongoClose()
+            await mongoClientInstance.database.collection(this.mongoLogsCollections).insertMany(mongoData);
+            await mongoClientInstance.mongoClose();
         }
         return 1;
     }
@@ -217,15 +217,12 @@ export class AverageCostStrategyClass implements StrategyInterface {
     }
 }
 
-const strategyData  =  { 
+const strategyData  =  {
     campaign_id:2,
-    end_hour_id:2,
     adgroup_id:2,
-    log_date:format(new Date(), 'yyyy-MM-dd'),
-    start_hour_id:2,
     wangwangid:'这是个测试',
     total_budget:230000 //单位是分
-}
+};
 
 const test = new AverageCostStrategyClass(strategyData);
 test.handle();

@@ -50,7 +50,7 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
                                     "campaignid":"123333",
                                     "adgroupid":"2233333",
                                     "bidwordid":"323333",
-                                    "cost":"100", //TODO 单位貌似是元
+                                    "cost":"11250", //TODO 单位貌似是元,但是 暂时按照分计算
                                     "thedate":"2021-06-17"
                                 },
                                 {
@@ -71,7 +71,7 @@ export class TaobaoSimbaRtrptBidwordGetClass extends ZhitongcheApiClass implemen
                                     "campaignid":"123333",
                                     "adgroupid":"2233333",
                                     "bidwordid":"326666",
-                                    "cost":"80", //TODO 单位貌似是元
+                                    "cost":"1100", //TODO 单位貌似是元
                                     "thedate":"2021-06-17"
                                 },
                             ]

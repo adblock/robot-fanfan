@@ -57,7 +57,6 @@ class Client {
             _key = key;
         }
         _key = CryptoJS.MD5(_key).toString();
-        _key = "cf43571ecbf5761b6dadcc2cec0eeb77"; //TODO 记得删掉
         const result = await this.redis.get(`${this.cache_key}_${_key}`);
         if(result){
             return JSON.parse(result);

@@ -1,5 +1,5 @@
 /*
-@File     ：average.kwy.words.cost.strategy.class.py
+@File     ：average.keywords.cost.strategy.class.py
 @Author   : xingchen
 @Date     ：2021/6/17 10:21
 @describe ： 关键词平均花费策略的实例类，根据传入的数据，筛选数据，计算数据，构造为api类
@@ -12,10 +12,10 @@ import { TaobaoSimbaRtrptBidwordGetClass, TaobaoSimbaKeywordsbyadgroupidGetClass
 import {format, subMinutes, getHours } from 'date-fns';
 import { mongoClient } from '../../libs/mongoClient'
 
-export class AverageKeyWordsCostStrategyClass implements StrategyInterface {
+export class AverageKeywordsCostStrategyClass implements StrategyInterface {
     // 策略的常量数据
     public strategyData:any | {};
-    private mongoLogsCollections = 'zhitongche_crowd_adjuster_logs';
+    private mongoLogsCollections = 'zhitongche_keywords_adjuster_logs';
     private theLastAdjusterDiffTime = 10; // 与上一次调整的比较时间长度（分钟）
     /**
      * 构造查询参数
@@ -66,6 +66,7 @@ export class AverageKeyWordsCostStrategyClass implements StrategyInterface {
         const keywordsBidData = new TaobaoSimbaKeywordsbyadgroupidGetClass(requestData, this.strategyData.wangwangid);
         //同步获取数据，为了给下面的数据赋予人群id的键
         const keywordsBidResult = await keywordsBidData.getResponse();
+        
         const dataResult = keywordsBidResult.simba_keywordsbyadgroupid_get_response.keywords.keyword;
         // 根据人群id赋予键
         const result = _.keyBy(dataResult, 'keyword_id');
@@ -76,7 +77,8 @@ export class AverageKeyWordsCostStrategyClass implements StrategyInterface {
      * 获取单品单元下人群列表，只获取投放中的
      * @returns
      */
-    private async getLastCost(bidwordidArr:number[]) {
+    private async getLastCost(bidwordidArr:string[]) {
+        console.log(bidwordidArr)
         //实例化mongo连接
         let mongoClientInstance = mongoClient;
         await mongoClientInstance.getDB();
@@ -100,6 +102,7 @@ export class AverageKeyWordsCostStrategyClass implements StrategyInterface {
                     bidwordid : {$first:"$bidwordid"},
                     last_cost : {$first:"$last_cost"},
                     date_minute : {$first:"$date_minute"},
+                    last_price : {$first:"$last_price"},
                 }
             }
         ]).toArray();
@@ -117,12 +120,11 @@ export class AverageKeyWordsCostStrategyClass implements StrategyInterface {
     private async adjuster (){
         const rptDataResult = await this.getRptData(); // 关键词实时数据
         const keywordsBidResult = await this.keywordsBid(); // 关键词 出价
-        console.log(rptDataResult);
-        return 123;
-        // console.log(keywordsBidResult);
-        const lastCostResult = await this.getLastCost(_.map(_.keys(keywordsBidResult), _.parseInt)); // TODO 关键词存储在mongo中的最后一次出价
-        const keywordsAverageCost = _.round(_.divide(this.strategyData.total_budget, rptDataResult.length)); // 计算关键词平均花费 = 总预算/关键词数量 //TODO 上传的total_budget单位待确认（暂定为分,如果是元 需要转换）
 
+        const lastCostResult = await this.getLastCost(_.keys(keywordsBidResult)); // TODO 关键词存储在mongo中的最后一次出价
+
+        const keywordsAverageCost = _.round(_.divide(this.strategyData.total_budget, rptDataResult.length)); // 计算关键词平均花费 = 总预算/关键词数量 //TODO 上传的total_budget单位待确认（暂定为分,如果是元 需要转换）
+       
         // TODO 修改关键词出价接口需要的数据,参数有待商榷
         let pricevonSetRequest:{
             keywordId:number,//关键词id
@@ -142,7 +144,7 @@ export class AverageKeyWordsCostStrategyClass implements StrategyInterface {
             let  last_cost = lastCostResult.hasOwnProperty(filter.bidwordid) ? lastCostResult[filter.bidwordid].last_cost : '0'; //上次花费 ，单位为分
 
             //TODO 消耗单位可能是分 暂定，上次消耗为分 当前出价为分，平均出价为分，最终出价为分
-            if(filter.cost <= keywordsAverageCost){
+            if(filter.cost < keywordsAverageCost){
                 let last_date_minute = lastCostResult.hasOwnProperty(filter.bidwordid) ? lastCostResult[filter.bidwordid].date_minute : "1970-01-01 00:00"; //上次修改时间
                 let ten_before_minute = format(subMinutes(new Date(), this.theLastAdjusterDiffTime), 'yyyy-MM-dd HH:mm'); //过去十分钟的时间点
                 if(last_date_minute > ten_before_minute){ //本次时间与上次修改时间不满十分钟
@@ -155,6 +157,12 @@ export class AverageKeyWordsCostStrategyClass implements StrategyInterface {
                         //当前时刻较上次（也可能是过去的某个时间点）消耗未变,出价上调
                         maxPrice = _.multiply(keywordsBidResult[filter.bidwordid].max_price, (1 + price_range));
                     }
+                }
+            }else{
+                let last_price = lastCostResult.hasOwnProperty(filter.bidwordid) ? lastCostResult[filter.bidwordid].last_price : 0; //获取上次出价 ，如果没有给0
+                if(last_price === 5){
+                    //如果是最小出价，return 跳出循环
+                    return;
                 }
             }
             //将拼凑的数据压入最终数组
@@ -177,23 +185,30 @@ export class AverageKeyWordsCostStrategyClass implements StrategyInterface {
             //有数据、修改数据
             const adjusterData = new TaobaoSimbaKeywordsPricevonSet(pricevonSetRequest, this.strategyData.wangwangid);
             const adjusterResult = await adjusterData.getResponse();
-        }
-        if(mongoData.length > 0){
-            //实例化mongo连接
-            let mongoClientInstance = mongoClient;
-            await mongoClientInstance.getDB();
             //此处将人群id，当前消耗、推广组id，旺旺id、时间（年月日时分）存入mongo
-            //批量 插入数据
-            await mongoClientInstance.database.collection(this.mongoLogsCollections).insertMany(mongoData);
-            await mongoClientInstance.mongoClose();
+            if(mongoData.length > 0){
+                console.log(mongoData)
+                //实例化mongo连接
+                let mongoClientInstance = mongoClient;
+                await mongoClientInstance.getDB();
+                //批量 插入数据
+                await mongoClientInstance.database.collection(this.mongoLogsCollections).insertMany(mongoData);
+                await mongoClientInstance.mongoClose();
+            }
+            return adjusterResult;
+        }else{
+            return false;
         }
-        return 1;
+        
     }
 
     public handle():void{
         // 获取人群数据筛选出结果数据,返回的仍然是个promise对象
         const adjuster = this.adjuster();
         adjuster.then(function (data) {
+            if(data){
+                console.log(data.simba_keywords_pricevon_set_response.keywords.keyword);
+            }
              console.log(data);
         });
     }
@@ -203,8 +218,8 @@ const strategyData  =  {
     campaign_id:2,
     adgroup_id:2,
     wangwangid:'这是个测试',
-    total_budget:230000 //单位是分
+    total_budget:45000 //单位是分
 };
 
-const test = new AverageKeyWordsCostStrategyClass(strategyData);
+const test = new AverageKeywordsCostStrategyClass(strategyData);
 test.handle();

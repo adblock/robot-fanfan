@@ -31,7 +31,7 @@ export class TaobaoSimbaKeywordsbyadgroupidGetClass  extends ZhitongcheApiClass 
 
     // 获取请求
     public async getResponse(){
-        if(this.reponse.method === undefined){
+        if(this.reponse === undefined){
             const cache = await this.redisClient.getCache(this.request);
             if(cache){
                 this.reponse = cache;

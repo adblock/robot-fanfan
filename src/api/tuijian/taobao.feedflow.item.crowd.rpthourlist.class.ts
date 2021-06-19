@@ -36,7 +36,7 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.execute(this.request, this.wangwang).then(function (res) {
+            this.reponse = this.execute(this.request, this.wangwang).then((res)=> {
                 res = {
                     "feedflow_item_crowd_rpthourlist_response":{
                         "result":{
@@ -156,6 +156,7 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
                         }
                     }
                 };
+                // 存储数据的到Mongo
                 return res;
             }).catch(data=>{
                 console.log(data.code,'11111111111');

@@ -8,6 +8,7 @@
 
 import { ApiInterface } from "../api.interface";
 import {TuijianApiClass} from "./tuijian.api.class";
+import {saveApiToMongodata, getApiFormMongoByDiffTime} from "../api.func";
 
 export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass implements ApiInterface {
     constructor(request:{
@@ -36,7 +37,7 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.execute(this.request, this.wangwang).then((res)=> {
+            this.reponse = this.execute(this.request, this.wangwang).then(async (res)=> {
                 res = {
                     "feedflow_item_crowd_rpthourlist_response":{
                         "result":{
@@ -157,6 +158,12 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
                     }
                 };
                 // 存储数据的到Mongo
+                await saveApiToMongodata({
+                    requests:this.request,
+                    data:res,
+                    apiName:this.api,
+                    wangwang:this.wangwang,
+                });
                 return res;
             }).catch(data=>{
                 console.log(data.code,'11111111111');
@@ -164,4 +171,30 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
         }
         return this.reponse;
     }
+    /**
+     * 获取此接口 diffTime 前的最后一条数据 diffTime为分钟
+     * @params diffTime number 分钟
+     * */
+    public async getResponseByDiffTime(diffTime:number){
+        return await getApiFormMongoByDiffTime({
+            requests:this.request,
+            diffTime:diffTime,
+            apiName:this.api,
+            wangwang:this.wangwang,
+        });
+    }
 }
+
+const test = new TaobaoFeedflowItemCrowdRpthourlistClass({
+    campaign_id:1,
+    end_hour_id:1,
+    adgroup_id:1,
+    log_date:'2021-06-21',
+    start_hour_id:1,
+},'121212121');
+
+test.getResponse();
+
+test.getResponseByDiffTime(0).then(function (data) {
+    console.log(data);
+});

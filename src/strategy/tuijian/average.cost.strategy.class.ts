@@ -5,7 +5,7 @@
  * 超级推荐【商品推广】单元分时报表查询
  * 文档：https://open.taobao.com/API.htm?docId=43477&docType=2
  * */
-import _ from 'lodash';
+import _, { toInteger } from 'lodash';
 import { StrategyInterface } from '../strategy.interface';
 import { TaobaoFeedflowItemCrowdModifyBindClass, TaobaoFeedflowItemCrowdRpthourlistClass, TaobaoFeedflowItemCrowdPageClass } from '../../api';
 import {format, subMinutes, getHours } from 'date-fns';
@@ -40,18 +40,36 @@ export class AverageCostStrategyClass implements StrategyInterface {
     private async getRptData(){
         //拼凑查询数据
         let requestData = {
-            campaign_id : this.strategyData.campaign_id,
-            adgroup_id : this.strategyData.adgroup_id,
-            log_date : format(new Date(), 'yyyy-MM-dd'),
-            start_hour_id : 0,
-            end_hour_id : getHours(new Date()),
+            rpt_query:{
+                campaign_id : this.strategyData.campaign_id,
+                adgroup_id : this.strategyData.adgroup_id,
+                log_date : format(new Date(), 'yyyy-MM-dd'),
+                start_hour_id : 0,
+                end_hour_id : getHours(new Date()),
+            }
         };
 
         // 实例化广告主定向分时数据查询
         const fliterData = new TaobaoFeedflowItemCrowdRpthourlistClass(requestData,this.strategyData.wangwangid);
         //获取数据
         const result = await fliterData.getResponse();
-        return  result.feedflow_item_crowd_rpthourlist_response.result.rpt_list.rpt_result_dto;
+        let endResult = result.feedflow_item_crowd_rpthourlist_response.result.rpt_list.rpt_result_dto;
+       
+        //将数据按照人群id分组
+        endResult = _.groupBy(endResult, "crowd_id");
+        //数据最终承载数组
+        let resultData:{}[] = [];
+
+        //循环处理分组数据
+        _.forEach(endResult, function(value, key) {
+            let tmpSum = _.sum(_.map(_.map(value,'charge'),_.parseInt));
+            resultData.unshift({
+                crowd_id : _.parseInt(key),
+                charge : _.toString(tmpSum),//将数据还原为原始数据字符串类型
+            })
+        });
+
+        return  resultData;
     }
 
     /**
@@ -61,12 +79,11 @@ export class AverageCostStrategyClass implements StrategyInterface {
     private async crowdPage() {
         //拼接查询参数
         let requestData = {
-            crowd_query : [
-                {
-                    adgroup_id: this.strategyData.adgroup_id,
-                    status_list : ['start'] //只获取投放中的的
-                }
-            ]
+            crowd_query : 
+            {
+                adgroup_id: this.strategyData.adgroup_id,
+                status_list : ['start'] //只获取投放中的的
+            }         
         };
         // 批量获取人群出价
         const crowdPageData = new TaobaoFeedflowItemCrowdPageClass(requestData, this.strategyData.wangwangid);
@@ -147,9 +164,10 @@ export class AverageCostStrategyClass implements StrategyInterface {
                 //如果没有当前人群的出价，说明是非投放中，则不作处理
                 return; //return 跳出当次循环
             }
-            let  price = 0.05;  // 定义初始出价
+
+            let  price = 5;  // 定义初始出价
             let  status = 'start'; // 定义初始状态
-            let  price_range = 0.02; // 调价幅度，相当于百分之二
+            let  price_range = 0.05; // 调价幅度，相当于百分之5
             let  last_charge = lastChargeResult.hasOwnProperty(filter.crowd_id) ? lastChargeResult[filter.crowd_id].last_charge : '0'; //上次花费 ，单位为元
 
             //消耗单位是元，上次消耗为元 当前出价为分，平均出价为分，最终出价为分
@@ -164,12 +182,12 @@ export class AverageCostStrategyClass implements StrategyInterface {
                     return;//未满10分钟 return 跳出当次循环
                 }else{
                     //消耗小于人群平均日限
-                    if(filter.charge > last_charge){
+                    if(filter.charge * 1 > last_charge * 1){
                         //当前时刻较上次（也可能是过去的某个时间点）消耗上升,出价不变
                         price = crowdPageResult[filter.crowd_id].price;//出价不变
                     }else{
                         //当前时刻较上次（也可能是过去的某个时间点）消耗未变,出价上调
-                        price = _.multiply(crowdPageResult[filter.crowd_id].price, (1 + price_range));
+                        price = _.round(crowdPageResult[filter.crowd_id].price * (1 + price_range)) ;
                     }
                 }
             }
@@ -218,11 +236,17 @@ export class AverageCostStrategyClass implements StrategyInterface {
 }
 
 const strategyData  =  {
-    campaign_id:2,
-    adgroup_id:2,
-    wangwangid:'这是个测试',
-    total_budget:230000 //单位是分
+    campaign_id:2136965458,
+    adgroup_id:2618700059,
+    wangwangid:'卡莫妮旗舰店',
+    total_budget:10000 //单位是分
 };
+
+// token ： 6201f1214b9694e9088bdf0d4d2505a2fbd23a1efe1d634835086076
+// 计划id ： 2136965458
+// 单元id：2618700059
+// 预算：100
+// 旺旺：卡莫妮旗舰店
 
 const test = new AverageCostStrategyClass(strategyData);
 test.handle();

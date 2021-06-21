@@ -38,7 +38,7 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass impl
     public wangwang;
 
     // 接口名称
-    public api = 'taobao.httpdns.get'; //taobao.feedflow.item.crowd.modifybind
+    public api = 'taobao.feedflow.item.crowd.modifybind'; //taobao.feedflow.item.crowd.modifybind
 
     // 响应参数
     public reponse:any | undefined;
@@ -49,14 +49,14 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass impl
             this.reponse = this.execute(this.request,this.wangwang).then(function (res) {
                 // console.log('2--------------------------------------');
                 // console.log(res);
-                res = {
-                    "feedflow_item_crowd_modifybind_response":{
-                        "result":{
-                            "message":"成功",
-                            "success":'success'
-                        }
-                    }
-                }
+                // res = {
+                //     "feedflow_item_crowd_modifybind_response":{
+                //         "result":{
+                //             "message":"成功",
+                //             "success":'success'
+                //         }
+                //     }
+                // }
                 
 
                 return res;

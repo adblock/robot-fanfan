@@ -2,7 +2,7 @@
  * TaobaoFeedflowItemCrowdPageClass
  * 
  * 分页查询单品单元下人群列表 ，处理策略传入的数据构造成，接口文档要求的数据结构
- * 文档：https://open.taobao.com/API.htm?docId=43252&docType=2
+ * 文档：https://open.taobao.com/API.htm?docId=43247&docType=2
  * 
  * */
 
@@ -14,7 +14,7 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
         crowd_query: {
             adgroup_id:number,
             status_list:string[]
-        }[];  
+        };  
     }, wangwang:string){
         super();
         this.request = request;
@@ -28,7 +28,7 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
     public wangwang;
 
     // 接口名称
-    public api = 'taobao.httpdns.get'; //taobao.feedflow.item.crowd.page
+    public api = 'taobao.feedflow.item.crowd.page'; //taobao.feedflow.item.crowd.page
 
     // 响应参数
     public reponse:any | undefined;
@@ -37,99 +37,97 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
     public getResponse():any{
         if(this.reponse === undefined){
             this.reponse = this.execute(this.request,this.wangwang).then(function (res) {
-                // console.log('2--------------------------------------');
-                // console.log(res);
-                res = {
-                    "feedflow_item_crowd_page_response":{
-                        "result":{
-                            "message":"message",
-                            "crowds":{
-                                "crowd_dto":[
-                                    // {
-                                    //     "crowd_id":123,
-                                    //     "crowd_name":"test",
-                                    //     "crowd_desc":"test",
-                                    //     "price":100,
-                                    //     "campaign_id":1,
-                                    //     "adgroup_id":1,
-                                    //     "status":"pause",
-                                    //     "target_label":{
-                                    //         "label_id":1,
-                                    //         "target_id":1,
-                                    //         "target_type":"ITEM_RECOMMEND",
-                                    //         "label_name":"test",
-                                    //         "label_desc":"test",
-                                    //         "label_value":"ALL",
-                                    //         "options":{
-                                    //             "option_dto":[
-                                    //                 {
-                                    //                     "option_name":"test",
-                                    //                     "option_value":"ALL",
-                                    //                     "option_desc":"test"
-                                    //                 }
-                                    //             ]
-                                    //         }
-                                    //     }
-                                    // },
-                                    {
-                                        "crowd_id":456,
-                                        "crowd_name":"test",
-                                        "crowd_desc":"test",
-                                        "price":100,
-                                        "campaign_id":1,
-                                        "adgroup_id":1,
-                                        "status":"start",
-                                        "target_label":{
-                                            "label_id":1,
-                                            "target_id":1,
-                                            "target_type":"ITEM_RECOMMEND",
-                                            "label_name":"test",
-                                            "label_desc":"test",
-                                            "label_value":"ALL",
-                                            "options":{
-                                                "option_dto":[
-                                                    {
-                                                        "option_name":"test",
-                                                        "option_value":"ALL",
-                                                        "option_desc":"test"
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "crowd_id":789,
-                                        "crowd_name":"test3",
-                                        "crowd_desc":"test",
-                                        "price":100,
-                                        "campaign_id":1,
-                                        "adgroup_id":1,
-                                        "status":"start",
-                                        "target_label":{
-                                            "label_id":1,
-                                            "target_id":1,
-                                            "target_type":"ITEM_RECOMMEND",
-                                            "label_name":"test",
-                                            "label_desc":"test",
-                                            "label_value":"ALL",
-                                            "options":{
-                                                "option_dto":[
-                                                    {
-                                                        "option_name":"test",
-                                                        "option_value":"ALL",
-                                                        "option_desc":"test"
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                ]
-                            },
-                            "total_count":100,
-                            "success":true
-                        }
-                    }
-                }
+                // res = {
+                //     "feedflow_item_crowd_page_response":{
+                //         "result":{
+                //             "message":"message",
+                //             "crowds":{
+                //                 "crowd_dto":[
+                //                     // {
+                //                     //     "crowd_id":123,
+                //                     //     "crowd_name":"test",
+                //                     //     "crowd_desc":"test",
+                //                     //     "price":100,
+                //                     //     "campaign_id":1,
+                //                     //     "adgroup_id":1,
+                //                     //     "status":"pause",
+                //                     //     "target_label":{
+                //                     //         "label_id":1,
+                //                     //         "target_id":1,
+                //                     //         "target_type":"ITEM_RECOMMEND",
+                //                     //         "label_name":"test",
+                //                     //         "label_desc":"test",
+                //                     //         "label_value":"ALL",
+                //                     //         "options":{
+                //                     //             "option_dto":[
+                //                     //                 {
+                //                     //                     "option_name":"test",
+                //                     //                     "option_value":"ALL",
+                //                     //                     "option_desc":"test"
+                //                     //                 }
+                //                     //             ]
+                //                     //         }
+                //                     //     }
+                //                     // },
+                //                     {
+                //                         "crowd_id":456,
+                //                         "crowd_name":"test",
+                //                         "crowd_desc":"test",
+                //                         "price":100,
+                //                         "campaign_id":1,
+                //                         "adgroup_id":1,
+                //                         "status":"start",
+                //                         "target_label":{
+                //                             "label_id":1,
+                //                             "target_id":1,
+                //                             "target_type":"ITEM_RECOMMEND",
+                //                             "label_name":"test",
+                //                             "label_desc":"test",
+                //                             "label_value":"ALL",
+                //                             "options":{
+                //                                 "option_dto":[
+                //                                     {
+                //                                         "option_name":"test",
+                //                                         "option_value":"ALL",
+                //                                         "option_desc":"test"
+                //                                     }
+                //                                 ]
+                //                             }
+                //                         }
+                //                     },
+                //                     {
+                //                         "crowd_id":789,
+                //                         "crowd_name":"test3",
+                //                         "crowd_desc":"test",
+                //                         "price":100,
+                //                         "campaign_id":1,
+                //                         "adgroup_id":1,
+                //                         "status":"start",
+                //                         "target_label":{
+                //                             "label_id":1,
+                //                             "target_id":1,
+                //                             "target_type":"ITEM_RECOMMEND",
+                //                             "label_name":"test",
+                //                             "label_desc":"test",
+                //                             "label_value":"ALL",
+                //                             "options":{
+                //                                 "option_dto":[
+                //                                     {
+                //                                         "option_name":"test",
+                //                                         "option_value":"ALL",
+                //                                         "option_desc":"test"
+                //                                     }
+                //                                 ]
+                //                             }
+                //                         }
+                //                     }
+                //                 ]
+                //             },
+                //             "total_count":100,
+                //             "success":true
+                //         }
+                //     }
+                // }
                 return res;
             }).catch(data=>{
                 console.log(data.code,'11111111');

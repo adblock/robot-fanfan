@@ -29,7 +29,7 @@ export class ApiClass {
      * **/
     public execute(params:any, wangwang:string){
         // todo 开发一session 先默认为超级女声琳琳
-        let session = '62022077d0199a0ZZb43e76a2b5dd2d628f94567aae6db826151499';
+        let session = '6201f1214b9694e9088bdf0d4d2505a2fbd23a1efe1d634835086076';
         return this.topClient.execute(this.api, params, session);
     }
 }

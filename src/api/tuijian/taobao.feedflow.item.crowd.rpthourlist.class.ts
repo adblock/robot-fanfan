@@ -39,7 +39,7 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
     public reponse:any | undefined;
 
     // 获取请求
-    public getResponse(){
+    public getResponse():any{
         if(this.reponse === undefined){
             //构造临时数据结构
             let tmpRequest = { 
@@ -49,6 +49,14 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
                 wangwang:this.wangwang,
             }
             this.reponse = this.execute(this.request, this.wangwang).then(async function (res) {
+                // res = {
+                //     "error_response":{
+                //         "msg":"Remote service error",
+                //         "code":50,
+                //         "sub_msg":"非法参数",
+                //         "sub_code":"isv.invalid-parameter"
+                //     }
+                // }
                 // 存储数据的到Mongo
                 tmpRequest.data = res
                 await saveApiToMongodata(tmpRequest);
@@ -73,18 +81,18 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
     }
 }
 
-const test = new TaobaoFeedflowItemCrowdRpthourlistClass( {
-    rpt_query:{
-        campaign_id:1,
-        end_hour_id:1,
-        adgroup_id:1,
-        log_date:'2021-06-21',
-        start_hour_id:1,
-    }
-},'121212121');
+// const test = new TaobaoFeedflowItemCrowdRpthourlistClass( {
+//     rpt_query:{
+//         campaign_id:1,
+//         end_hour_id:1,
+//         adgroup_id:1,
+//         log_date:'2021-06-21',
+//         start_hour_id:1,
+//     }
+// },'121212121');
 
-test.getResponse();
+// test.getResponse();
 
-test.getResponseByDiffTime(0).then(function (data) {
-    console.log(data);
-});
+// test.getResponseByDiffTime(0).then(function (data) {
+//     console.log(data);
+// });

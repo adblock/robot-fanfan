@@ -59,7 +59,7 @@ class Client {
         _key = CryptoJS.MD5(_key).toString();
         const result = await this.redis.get(`${this.cache_key}_${_key}`);
         if(result){
-            return JSON.stringify(result);
+            return JSON.parse(result);
         }else {
             return result;
         }

@@ -10,8 +10,9 @@ import { ApiInterface } from "../api.interface";
 
 export class TaobaoSimbaKeywordsPricevonSet extends ZhitongcheApiClass implements ApiInterface{
     constructor(request:{
-        keywordid_prices:string,
-    }, wangwang:string){
+        keywordId:number,//关键词id
+        maxPrice:number,//出价,以分为单位
+    }[], wangwang:string){
         super();
         this.request = request;
         this.wangwang = wangwang;
@@ -32,7 +33,7 @@ export class TaobaoSimbaKeywordsPricevonSet extends ZhitongcheApiClass implement
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            this.reponse = this.execute(this.request, this.wangwang).then(function (res:any) {
+            this.reponse = this.execute(JSON.stringify(this.request), this.wangwang).then(function (res:any) {
                 res = {
                     "simba_keywords_pricevon_set_response":{
                         "keywords":{

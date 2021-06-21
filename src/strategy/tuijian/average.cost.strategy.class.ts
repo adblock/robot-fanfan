@@ -168,7 +168,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
 
             let  price = 5;  // 定义初始出价
             let  status = 'start'; // 定义初始状态
-            let  price_range = 0.05; // 调价幅度，相当于百分之5
+            let  price_range = 1; // TODO  暂时定为1分调价幅度，相当于百分之5
             let  last_charge = lastChargeResult.hasOwnProperty(filter.crowd_id) ? lastChargeResult[filter.crowd_id].last_charge : '0'; //上次花费 ，单位为元
             // console.log(last_charge);
 
@@ -184,7 +184,8 @@ export class AverageCostStrategyClass implements StrategyInterface {
                     price = crowdPageResult[filter.crowd_id].price;//出价不变
                 }else{
                     //当前时刻较上次（也可能是过去的某个时间点）消耗未变,出价上调
-                    price = _.round(crowdPageResult[filter.crowd_id].price * (1 + price_range)) ;
+                    // price = _.round(crowdPageResult[filter.crowd_id].price * (1 + price_range)) ;
+                    price = crowdPageResult[filter.crowd_id].price + 1 ;
                 }
             }
 
@@ -207,6 +208,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
     }
 
     public handle():void{
+        // console.log("正在执行")
         // 获取人群数据筛选出结果数据,返回的仍然是个promise对象
         const adjuster = this.adjuster();
         adjuster.then(function (data) {
@@ -229,6 +231,13 @@ const strategyData  =  {
 // 旺旺：卡莫妮旗舰店
 
 const test = new AverageCostStrategyClass(strategyData);
-test.handle();
+
+//没两分钟执行一次的定时任务
+let i = 0;
+setInterval(function () {
+    console.log(i,new Date(),'----------------------------------------------');
+    i++;
+    test.handle();
+},1000*2*60)
 
 

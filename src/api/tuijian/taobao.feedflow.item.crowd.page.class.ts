@@ -13,7 +13,7 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
     constructor(request:{
         crowd_query: {
             adgroup_id:number,
-            status_list:string[]
+            // status_list:string[]
         };  
     }, wangwang:string){
         super();

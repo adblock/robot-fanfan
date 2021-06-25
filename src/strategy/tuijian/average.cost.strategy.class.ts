@@ -8,7 +8,7 @@
 import _, { clone } from 'lodash';
 import { StrategyInterface } from '../strategy.interface';
 import { TaobaoFeedflowItemCrowdModifyBindClass, TaobaoFeedflowItemCrowdRpthourlistClass, TaobaoFeedflowItemCrowdPageClass } from '../../api';
-import {format, getHours, subHours, subMinutes } from 'date-fns';
+import {format, getHours, subDays, subHours, subMinutes } from 'date-fns';
 import moment from 'moment';
 import { Double } from 'bson';
 
@@ -162,9 +162,6 @@ export class AverageCostStrategyClass implements StrategyInterface {
         const fliterData = new TaobaoFeedflowItemCrowdRpthourlistClass(requestData,this.strategyData.wangwangid); 
         const lastResult = await this.getLastData(fliterData); // 人群存储在mongo中的最后一次出价（或展现）
 
-        console.log(lastResult)
-        return 111;
-
         const rptDataResult = await this.getRptData(fliterData); // 人群实时数据
         //如果出错 直接返回
         if(rptDataResult.error_response){
@@ -188,13 +185,13 @@ export class AverageCostStrategyClass implements StrategyInterface {
         };
 
         let nowMinute = format(new Date(), 'yyyy-MM-dd HH:mm');//当前时间
-        let beginStart = format(new Date(), 'yyyy-MM-dd 00:00');//状态变更时间段开始
+        let beginStart = format(subDays(new Date(), 1),'yyyy-MM-dd 23:55');//状态变更时间段开始
         let beginEnd = format(new Date(), 'yyyy-MM-dd 00:03');//状态变更时间段结束
-
+        
         //循环处理人群，将暂停人群激活为投放中
         _.forEach(crowdPageResult, function(value, key) {
             // 如果是新的一天，将价格调为最低价
-            if(moment(nowMinute).isBetween(beginStart, beginEnd)){
+            if(nowMinute>=beginStart && nowMinute <= beginEnd){
                 crowdModifyRequest.crowds.unshift({
                     price : 5,
                     status : 'start',
@@ -238,7 +235,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
                         price = this.maxPrice;//将价格设置为最高出价
                     }else{
                         let tmpPrice = _.round(crowdPagePrice * (1 + price_range))
-                        price = (tmpPrice<=150) ? tmpPrice : 150; //按比例调整价格
+                        price = (tmpPrice<=this.maxPrice) ? tmpPrice : this.maxPrice; //按比例调整价格
                     }
                 }
             }

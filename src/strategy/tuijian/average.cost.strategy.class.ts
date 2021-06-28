@@ -9,13 +9,10 @@ import _, { clone } from 'lodash';
 import { StrategyInterface } from '../strategy.interface';
 import { TaobaoFeedflowItemCrowdModifyBindClass, TaobaoFeedflowItemCrowdRpthourlistClass, TaobaoFeedflowItemCrowdPageClass } from '../../api';
 import {format, getHours, subDays, subHours, subMinutes } from 'date-fns';
-import moment from 'moment';
-import { Double } from 'bson';
 
 export class AverageCostStrategyClass implements StrategyInterface {
     // 策略的常量数据
     public strategyData:any | {};
-    private mongoLogsCollections = 'tuijian_crowd_adjuster_logs';
     private theLastAdjusterDiffTime = 10; // 与上一次调整的比较时间长度（分钟）
     private maxPrice:number = 150; // 最高出价（分）
     /**
@@ -127,9 +124,9 @@ export class AverageCostStrategyClass implements StrategyInterface {
      */
     public makePriceRange(nowPrice:number) {
         let price_range;
-        if(nowPrice <= 10){//小于一毛，每次加一半的价格
-            price_range = 0.5;
-        }else if(nowPrice > 10 && nowPrice <= 50){
+        if(nowPrice < 10){//小于一毛，每次加一半的价格
+            price_range = 0.3;
+        }else if(nowPrice >= 10 && nowPrice <= 50){
             price_range = 0.1
         }else if(nowPrice > 50 && nowPrice <= 80){
             price_range = 0.05
@@ -298,14 +295,14 @@ const strategyData  =  {
 // 旺旺：卡莫妮旗舰店
 
 const test = new AverageCostStrategyClass(strategyData);
-test.handle();
+// test.handle();
 
 //没两分钟执行一次的定时任务
-// let i = 0;
-// setInterval(function () {
-//     console.log(i,new Date(),'----------------------------------------------');
-//     i++;
-//     test.handle();
-// },1000*2*60)
+let i = 0;
+setInterval(function () {
+    console.log(i,new Date(),'----------------------------------------------');
+    i++;
+    test.handle();
+},1000*2*60)
 
 

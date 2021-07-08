@@ -1,3 +1,9 @@
+/*
+ * @Author: xingchen
+ * @Date: 2021-06-08 10:36:44
+ * @LastEditTime: 2021-06-30 15:08:02
+ * @Description: 
+ */
 /**
  * TaobaoFeedflowItemCrowdRpthourlistClass 
  * 
@@ -13,13 +19,11 @@ import { arMA } from "date-fns/locale";
 
 export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass implements ApiInterface {
     constructor(request:{
-        rpt_query:{
-            campaign_id:number,
-            end_hour_id:number,
-            adgroup_id:number,
-            log_date:string,
-            start_hour_id:number,
-        }
+        campaign_id:number,
+        end_hour_id:number,
+        adgroup_id:number,
+        log_date:string,
+        start_hour_id:number,
     }, wangwang:string){
         super();
         this.request = request;
@@ -48,7 +52,10 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
                 apiName:this.api,
                 wangwang:this.wangwang,
             }
-            this.reponse = this.execute(this.request, this.wangwang).then(async function (res) {
+            let executeParams = {//重新构造接口参数
+                rpt_query:this.request
+            }
+            this.reponse = this.execute(executeParams, this.wangwang).then(async function (res) {
                 // res = {
                 //     "error_response":{
                 //         "msg":"Remote service error",
@@ -71,13 +78,16 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
      * 获取此接口 diffTime 前的最后一条数据 diffTime为分钟
      * @params diffTime number 分钟
      * */
-    public async getResponseByDiffTime(diffTime:number){
+    public async getResponseByDiffTime(diffTime:number,limit:number = 1){
+        let tmpRequests = JSON.parse(JSON.stringify(this.request));//数据深拷贝
+        delete(tmpRequests.end_hour_id);//去掉多余参数
+
         return await getApiFormMongoByDiffTime({
-            requests:this.request,
+            requests:tmpRequests,
             diffTime:diffTime,
             apiName:this.api,
-            wangwang:this.wangwang,
-        });
+            wangwang:this.wangwang,   
+        },limit);
     }
 }
 

@@ -83,11 +83,7 @@ export class AverageCostStrategyClass implements StrategyInterface {
     private async crowdPage() {
         //拼接查询参数
         let requestData = {
-            crowd_query : 
-            {
-                adgroup_id: this.strategyData.adgroup_id,
-                // status_list : ['start'] //只获取投放中的的
-            }         
+            adgroup_id: this.strategyData.adgroup_id,      
         };
         // 批量获取人群出价
         const crowdPageData = new TaobaoFeedflowItemCrowdPageClass(requestData, this.strategyData.wangwangid);
@@ -148,13 +144,11 @@ export class AverageCostStrategyClass implements StrategyInterface {
     private async adjuster (){
         //拼凑实时数据接口查询参数
         let requestData = {
-            rpt_query:{
-                campaign_id : this.strategyData.campaign_id,
-                adgroup_id : this.strategyData.adgroup_id,
-                log_date : format(new Date(), 'yyyy-MM-dd'),
-                start_hour_id : 0,
-                end_hour_id : getHours(new Date()),
-            }
+            campaign_id : this.strategyData.campaign_id,
+            adgroup_id : this.strategyData.adgroup_id,
+            log_date : format(new Date(), 'yyyy-MM-dd'),
+            start_hour_id : 0,
+            end_hour_id : getHours(new Date()),
         };
         const fliterData = new TaobaoFeedflowItemCrowdRpthourlistClass(requestData,this.strategyData.wangwangid); 
         const lastResult = await this.getLastData(fliterData); // 人群存储在mongo中的最后一次出价（或展现）

@@ -1,7 +1,7 @@
 /*
  * @Author: xingchen
  * @Date: 2021-06-16 11:49:19
- * @LastEditTime: 2021-06-25 09:51:45
+ * @LastEditTime: 2021-06-30 15:01:43
  * @Description: 
  */
 /**
@@ -18,10 +18,7 @@ import {TuijianApiClass} from "./tuijian.api.class";
 
 export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements ApiInterface {
     constructor(request:{
-        crowd_query: {
-            adgroup_id:number,
-            // status_list:string[]
-        };  
+        adgroup_id:number,
     }, wangwang:string){
         super();
         this.request = request;
@@ -49,7 +46,10 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
                 apiName:this.api,
                 wangwang:this.wangwang,
             }
-            this.reponse = this.execute(this.request,this.wangwang).then(async function (res) {
+            let executeParams = {//重新构造接口参数
+                crowd_query:this.request
+            }
+            this.reponse = this.execute(executeParams,this.wangwang).then(async function (res) {
                 tmpRequest.data = res
                 await saveApiToMongodata(tmpRequest); //TODO 此处可去掉，暂时做log用
                 return res;

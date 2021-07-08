@@ -16,7 +16,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
     // 策略的常量数据
     public strategyData:any | {};
     private theLastAdjusterDiffTime = 1; // 与上一次调整的比较时间长度（分钟）
-    private maxPrice:number = 95; // 最高出价（分）
+    private maxPrice:number = 120; // 最高出价（分）
     /**
      * 构造查询参数
      * @param strategyData 用户传入数据
@@ -104,9 +104,10 @@ export class AverageTimeStrategyClass implements StrategyInterface {
     private async getLastData(fliterData:TaobaoFeedflowItemCrowdRpthourlistClass,pastExecutions:number = 1) {
         //获取过去某个时间点的数据
         const result = await fliterData.getResponseByDiffTime(this.theLastAdjusterDiffTime,pastExecutions);
+       
         //循环处理每一条数据
         result.forEach((value:any,key:any) => {
-            if(_.isEmpty(value) || value.created_am < format(subDays(new Date(), 1),'yyyy-MM-dd 23:59') || value.data.error_response || value.created_am < format(subMinutes(new Date(), 12),'yyyy-MM-dd HH:mm')){
+            if(_.isEmpty(value) || value.created_am < format(subDays(new Date(), 1),'yyyy-MM-dd 23:59') || _.has(value.data,'error_response') || value.created_am < format(subMinutes(new Date(), 12),'yyyy-MM-dd HH:mm')){
                 result[key] = [];
             }else{
                 let endResult = value.data.feedflow_item_crowd_rpthourlist_response.result.rpt_list.rpt_result_dto;
@@ -376,7 +377,7 @@ const strategyData  =  {
 const test = new AverageTimeStrategyClass(strategyData);
 // test.handle();
 
-//没两分钟执行一次的定时任务
+// 没两分钟执行一次的定时任务
 let i = 0;
 setInterval(function () {
     console.log(i,new Date(),'----------------------------------------------');

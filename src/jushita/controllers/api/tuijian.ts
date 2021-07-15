@@ -16,7 +16,7 @@ const index = async function (req: Request, res: Response) {
             res.json(data);
         });
     } else {
-        res.json({ token_error: '店铺API未授权' });
+        res.json({ token_error: 'token不存在' });
     }
 
 };

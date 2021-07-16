@@ -60,7 +60,7 @@ const callback = async (type:string, code:string) =>{
                 }
             }
         } catch (err) {
-            console.error(err.response.data);
+            console.error(err);
         }
     }
     return {

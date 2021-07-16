@@ -1,7 +1,7 @@
 /*
  * @Author: xingchen
  * @Date: 2021-06-08 10:36:44
- * @LastEditTime: 2021-06-30 15:08:02
+ * @LastEditTime: 2021-07-13 09:44:12
  * @Description: 
  */
 /**
@@ -56,14 +56,6 @@ export class TaobaoFeedflowItemCrowdRpthourlistClass extends TuijianApiClass imp
                 rpt_query:this.request
             }
             this.reponse = this.execute(executeParams, this.wangwang).then(async function (res) {
-                // res = {
-                //     "error_response":{
-                //         "msg":"Remote service error",
-                //         "code":50,
-                //         "sub_msg":"非法参数",
-                //         "sub_code":"isv.invalid-parameter"
-                //     }
-                // }
                 // 存储数据的到Mongo
                 tmpRequest.data = res
                 await saveApiToMongodata(tmpRequest);

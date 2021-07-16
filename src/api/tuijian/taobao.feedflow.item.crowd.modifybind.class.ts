@@ -47,18 +47,6 @@ export class TaobaoFeedflowItemCrowdModifyBindClass extends TuijianApiClass impl
     public async getResponse(){
         if(this.reponse === undefined){
             this.reponse = this.execute(this.request,this.wangwang).then(function (res) {
-                // console.log('2--------------------------------------');
-                // console.log(res);
-                // res = {
-                //     "feedflow_item_crowd_modifybind_response":{
-                //         "result":{
-                //             "message":"成功",
-                //             "success":'success'
-                //         }
-                //     }
-                // }
-                
-
                 return res;
             }).catch(data=>{
                 console.log(data.code,'11111111');

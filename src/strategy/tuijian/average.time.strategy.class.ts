@@ -39,21 +39,6 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             wangwangid: '',
         };
     }
-    // constructor(
-    //     //TODO  此处的参数可以从数据库获取有些参数后续需要计算
-    //     strategyData : { 
-    //         campaign_id:number,
-    //         adgroup_id:number,
-    //         wangwangid:string,
-    //         time_budget:number,//时段对应的预算
-    //         beginStart: string,//投放开始时间(用户传入)
-    //         beginEnd: string//结束时间(用户传入)
-    //     }
-    // ){
-    //     // 设置策略数据
-    //     this.strategyData = strategyData;
-    // }
-
 
     /**
      * 定义修改接口的数据参数格式
@@ -754,15 +739,6 @@ export class AverageTimeStrategyClass implements StrategyInterface {
     }
 }
 
-// const strategyData  =  {
-//     campaign_id:2173812989,
-//     adgroup_id:2651692616, //TODO 这里可能会有多个单元，需要修改
-//     wangwangid:'卡莫妮旗舰店',
-//     time_budget:2000, //时段对应的预算
-//     beginStart: format(new Date(),'yyyy-MM-dd 16:00'),//投放时段开始(用户传入)
-//     beginEnd: format(new Date(), 'yyyy-MM-dd 18:00')//投放时段结束（用户传入）
-// };
-
 // token ： 6201f1214b9694e9088bdf0d4d2505a2fbd23a1efe1d634835086076
 // 计划id ： 2136965458
 // 单元id：2618700059
@@ -771,14 +747,14 @@ export class AverageTimeStrategyClass implements StrategyInterface {
 
 // const test = new AverageTimeStrategyClass(strategyData);
 const test = new AverageTimeStrategyClass();
-test.handle();
+// test.handle();
 
 // 没两分钟执行一次的定时任务
-// let i = 0;
-// setInterval(function () {
-//     console.log(i,new Date(),'----------------------------------------------');
-//     i++;
-//     test.handle();
-// },1000*excuteMinutes*60)
+let i = 0;
+setInterval(function () {
+    console.log(i,new Date(),'----------------------------------------------');
+    i++;
+    test.handle();
+},1000*excuteMinutes*60)
 
 

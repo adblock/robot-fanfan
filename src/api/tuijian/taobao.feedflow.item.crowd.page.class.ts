@@ -1,7 +1,7 @@
 /*
  * @Author: xingchen
  * @Date: 2021-06-16 11:49:19
- * @LastEditTime: 2021-06-30 15:01:43
+ * @LastEditTime: 2021-07-20 14:33:31
  * @Description: 
  */
 /**
@@ -40,18 +40,10 @@ export class TaobaoFeedflowItemCrowdPageClass extends TuijianApiClass implements
     // 获取请求
     public getResponse():any{
         if(this.reponse === undefined){
-            let tmpRequest = { 
-                requests:this.request,
-                data:'',
-                apiName:this.api,
-                wangwang:this.wangwang,
-            }
             let executeParams = {//重新构造接口参数
                 crowd_query:this.request
             }
             this.reponse = this.execute(executeParams,this.wangwang).then(async function (res) {
-                tmpRequest.data = res
-                await saveApiToMongodata(tmpRequest); //TODO 此处可去掉，暂时做log用
                 return res;
             }).catch(data=>{
                 console.log(data.code,'11111111');

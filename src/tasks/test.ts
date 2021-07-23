@@ -1,7 +1,7 @@
 /*
  * @Author: xingchen
  * @Date: 2021-06-08 10:36:45
- * @LastEditTime: 2021-07-21 16:28:24
+ * @LastEditTime: 2021-07-23 09:41:47
  * @Description: 
  */
 import { AverageCostStrategyClass } from '../strategy/tuijian/average.cost.strategy.class';
@@ -9,6 +9,7 @@ import  format from 'date-fns/format';
 import { ZhiZuanMysql, BossMysql } from '../libs/mysqlClient';
 import _ from 'lodash';
 import { AverageTimeStrategyClass } from '../strategy/tuijian/average.time.strategy.class';
+import { exit } from 'process';
 
 //当前时间
 let nowTimeTmp:any;
@@ -23,9 +24,8 @@ let strategyArr:any = {
 const excuteMinutes:number = 2;//执行频率（单位：分钟）
 const orderRunState:number = 2;//订单投放中状态
 
-//定义不同类型对应的boss数据库的中文释义
+//定义不同类型对应的boss数据库的f_foreign_sku_kind中文释义
 let skuKind:any = {
-    // f_foreign_sku_kind
     'chaotui':'超级推荐'
 }
 
@@ -108,11 +108,10 @@ let interval = setInterval(async function () {
     let campaignTimesDataInfo = await getCampaignTimesData();
     //给计划最终修改状态赋值
     campaignPauseStatus = await getCampaignPauseStatus(campaignTimesDataInfo);
-
     //循环处理每个计划
     campaignTimesDataInfo.forEach(async ( campaignTimesData:any,key:any) =>  {
         // 获取boss中的服务状态，投放则继续，暂停则跳过
-        if( campaignTimesData.f_type == 'chaotui'){//TODO 改为按照strategyArr格式
+        if( campaignTimesData.f_type == 'chaotui'){
             await ChangeChaoTui( campaignTimesData); //修改超推相关数据,其余类型类似，或者改为strategyArr方式
         }
     });

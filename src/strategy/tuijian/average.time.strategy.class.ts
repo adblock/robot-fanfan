@@ -252,8 +252,8 @@ export class AverageTimeStrategyClass implements StrategyInterface {
         let surplusMinutes = _.round((new Date(this.strategyData.f_end).getTime()-new Date().getTime())/60/1000);
         //计算单元当前的总消耗（转换单位为分）
         let adGroupCost = _.sum(_.map(_.map(rptDataResult,'charge'),_.toNumber));
-        //简化单元初始消耗 并转换为分
-        let adGroupFirstCharge = this.strategyData.f_crowd_start_charge[this.strategyData.f_adgroup_id] * 100;
+        //简化单元初始消耗 并转换为分,如果没有则认为是0
+        let adGroupFirstCharge = (this.strategyData.f_crowd_start_charge[this.strategyData.f_adgroup_id] ?? 0) * 100;
         //剩余单元阶段总预算=单元阶段预算-（当前单元消耗-单元阶段初始消耗）
         let surplusBudget = this.strategyData.f_budget - (adGroupCost - adGroupFirstCharge);
         //计算人群平均花费 = 剩余总预算/人群数量/剩余分钟数/每次执行时间
@@ -263,7 +263,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
         crowdModifyRequest = changeCrowdPageResult.crowdModifyRequest;//重新为数据修改接口所需数据赋值
         crowdPageResult = changeCrowdPageResult.crowdPageResult;//重新为人群出价和状态赋值
         //根据实时数据计算出价
-        crowdModifyRequest = await this.makeRptDataInfo(rptDataResult,crowdPageResult,lastResult,crowdAverageCost,crowdModifyRequest)
+        crowdModifyRequest = await this.makeRptDataInfo(rptDataResult,surplusBudget,crowdPageResult,lastResult,crowdAverageCost,crowdModifyRequest)
         //返回需要修改的数据
         return crowdModifyRequest;
     }
@@ -342,19 +342,20 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * 根据实时数据计算出价
      * @param rptDataResult 实时数据
      * @param crowdPageResult 实时出价
+     * @param surplusBudget 单元阶段剩余预算
      * @param lastResult 历史数据
      * @param crowdAverageCost 平均出价
      * @param crowdModifyRequest 价格修改接口所需参数
      * @returns 
      */
-    public async makeRptDataInfo(rptDataResult:any,crowdPageResult:any,lastResult:any,crowdAverageCost:any,crowdModifyRequest:any) {
+    public async makeRptDataInfo(rptDataResult:any,surplusBudget:any,crowdPageResult:any,lastResult:any,crowdAverageCost:any,crowdModifyRequest:any) {
         rptDataResult.forEach( (filter:any)=>{
             if(!(filter.crowd_id in crowdPageResult)){
                 //如果没有当前人群的出价或者暂停，说明是非投放中，则不作处理//return 跳出当次循环
                 return;
             }else{
-                //在里面 但是是暂停状态，说明已超额，不做处理
-                if(crowdPageResult[filter.crowd_id].status === 'pause'){
+                //在里面 但是是暂停状态，并且已超额，不做处理
+                if(crowdPageResult[filter.crowd_id].status === 'pause' && surplusBudget <= 0 ){
                     console.log(crowdPageResult[filter.crowd_id].crowd_name + "状态为暂停，不做处理，跳过")
                     delete crowdPageResult[filter.crowd_id]; //删除暂停超额的数据//return 跳出当次循环
                     return; 
@@ -764,23 +765,5 @@ export class AverageTimeStrategyClass implements StrategyInterface {
         });
     }
 }
-
-// token ： 6201f1214b9694e9088bdf0d4d2505a2fbd23a1efe1d634835086076
-// 计划id ： 2136965458
-// 单元id：2618700059
-// 预算：100
-// 旺旺：卡莫妮旗舰店
-
-// const test = new AverageTimeStrategyClass(strategyData);
-// const test = new AverageTimeStrategyClass();
-// test.handle();
-
-// 没两分钟执行一次的定时任务
-// let i = 0;
-// setInterval(function () {
-//     console.log(i,new Date(),'----------------------------------------------');
-//     i++;
-//     test.handle();
-// },1000*excuteMinutes*60)
 
 

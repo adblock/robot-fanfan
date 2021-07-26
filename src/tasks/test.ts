@@ -12,16 +12,16 @@ import { AverageTimeStrategyClass } from '../strategy/tuijian/average.time.strat
 import { exit } from 'process';
 
 //当前时间
-let nowTimeTmp:any;
+let nowTimeTmp:string;
 //计划状态
-let campaignPauseStatus:any;
+let campaignPauseStatus:{[key:string]:{changeStatusPause:boolean}};
 
 //定义不同类型对应的类
 let strategyArr:any = {
-    'chaotui':AverageTimeStrategyClass
+    'chaotui':AverageCostStrategyClass
 };
 
-const excuteMinutes:number = 2;//执行频率（单位：分钟）
+const excuteMinutes:number = 3;//执行频率（单位：分钟）
 const orderRunState:number = 2;//订单投放中状态
 
 //定义不同类型对应的boss数据库的f_foreign_sku_kind中文释义
@@ -35,9 +35,11 @@ let skuKind:any = {
  */
  async function getCampaignTimesData(){
     let MysqlClientInstance = ZhiZuanMysql;
-    let where:any = `(f_start <= '${nowTimeTmp}' and f_end >= '${nowTimeTmp}') or ((f_start >= '${nowTimeTmp}' or f_end <= '${nowTimeTmp}') and f_status != 'pause')`;
+    let where:string = `(f_start <= '${nowTimeTmp}' and f_end >= '${nowTimeTmp}') or ((f_start >= '${nowTimeTmp}' or f_end <= '${nowTimeTmp}') and f_status != 'pause')`;
     //查询数据
     let campaignTimesData = await MysqlClientInstance.table('t_automatic_operation_spider').where(where).select();
+
+    console.log(campaignTimesData);
     //返回
     return campaignTimesData;
 }
@@ -48,7 +50,7 @@ let skuKind:any = {
  * @param type 
  * @returns 
  */
-async function getOrderStatus(wangwang:any,type:any) {
+async function getOrderStatus(wangwang:string,type:string) {
     let MysqlClientInstance = BossMysql;
     let where:any = `f_foreign_sku_kind = '${skuKind[type]}' and f_copy_wangwangid = '${wangwang}' and f_foreign_order_state_id = ${orderRunState} `;//查询条件 投放中 类型对，旺旺对
     //查询数据
@@ -81,12 +83,12 @@ async function ChangeChaoTui(campaignTimesData:any) {
  * @param campaignTimesDataInfo 计划自动改价信息
  * @returns 
  */
-async function getCampaignPauseStatus(campaignTimesDataInfo:any) {
-    let campaignGroupArr:any = _.groupBy(campaignTimesDataInfo,'f_campaign_id');//根据计划分组
-    let campaignPauseStatus:any[]=[];
-    Object.keys(campaignGroupArr).forEach((campaignGroupArrValue:any,campaignGroupArrKey:any) => {
+async function getCampaignPauseStatus(campaignTimesDataInfo:object[]) {
+    let campaignGroupArr:{[key:string]:any[]} = _.groupBy(campaignTimesDataInfo,'f_campaign_id');//根据计划分组
+    let campaignPauseStatus:{[key:string]:{changeStatusPause:boolean}} = {};
+    Object.keys(campaignGroupArr).forEach((campaignGroupArrValue:string) => {
         let flag = true;
-        campaignGroupArr[campaignGroupArrValue].forEach((campaignValue:any,campaignKey:any) => {
+        campaignGroupArr[campaignGroupArrValue].forEach((campaignValue:{[key:string]:any}) => {
             if(flag){
                 if(campaignValue.f_start <= nowTimeTmp && campaignValue.f_end >= nowTimeTmp){
                     campaignPauseStatus[campaignGroupArrValue] = {changeStatusPause:false}
@@ -99,23 +101,45 @@ async function getCampaignPauseStatus(campaignTimesDataInfo:any) {
     });
     return campaignPauseStatus;
 }
-
 let i = 1; //定义第几次执行
-let interval = setInterval(async function () {
+(async function () {
     console.log('正在进行第'+ i + '次改价')
     nowTimeTmp = format(new Date(), 'HH:mm:ss');//为当前时间变量赋值
     //从数据库获取按照旺旺和计划分组的数据;
     let campaignTimesDataInfo = await getCampaignTimesData();
+    console.log(campaignTimesDataInfo);
     //给计划最终修改状态赋值
     campaignPauseStatus = await getCampaignPauseStatus(campaignTimesDataInfo);
     //循环处理每个计划
     campaignTimesDataInfo.forEach(async ( campaignTimesData:any,key:any) =>  {
         // 获取boss中的服务状态，投放则继续，暂停则跳过
         if( campaignTimesData.f_type == 'chaotui'){
-            await ChangeChaoTui( campaignTimesData); //修改超推相关数据,其余类型类似，或者改为strategyArr方式
+            // await ChangeChaoTui( campaignTimesData); //修改超推相关数据,其余类型类似，或者改为strategyArr方式
         }
     });
     i++;
-},1000*excuteMinutes*60); //没excuteMinutes分钟执行一次
+})();
+
+
+// let i = 1; //定义第几次执行
+// let interval = setInterval(async function () {
+//     console.log('正在进行第'+ i + '次改价')
+//     nowTimeTmp = format(new Date(), 'HH:mm:ss');//为当前时间变量赋值
+//     //从数据库获取按照旺旺和计划分组的数据;
+//     let campaignTimesDataInfo = await getCampaignTimesData();
+//     console.log(campaignTimesDataInfo);
+//     //给计划最终修改状态赋值
+//     campaignPauseStatus = await getCampaignPauseStatus(campaignTimesDataInfo);
+//     //循环处理每个计划
+//     campaignTimesDataInfo.forEach(async ( campaignTimesData:any,key:any) =>  {
+//         // 获取boss中的服务状态，投放则继续，暂停则跳过
+//         if( campaignTimesData.f_type == 'chaotui'){
+//             // await ChangeChaoTui( campaignTimesData); //修改超推相关数据,其余类型类似，或者改为strategyArr方式
+//         }
+//     });
+//     i++;
+// },1000*excuteMinutes*60); //没excuteMinutes分钟执行一次
+
+
 
 

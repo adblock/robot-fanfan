@@ -27,10 +27,35 @@ export class ApiClass {
      * 发送请求的方法
      * @params params any 参数
      * **/
-    public execute(params:any, wangwang:string){
-        // todo 开发一session 先默认为超级女声琳琳
-        let session = '6202806718a2bbdfc4f61fd525e4b0c58506e7709225de026151499';
-        return this.topClient.execute(this.api, params, session);
+    public async execute(params:any, wangwang:string){
+        let session:any = await this.getToken(wangwang);
+        if(session){
+            session = session.access_token;
+            return this.topClient.execute(this.api, params, session);
+        }else{
+            return { 
+                error_response:{ 
+                    code: 40,
+                    msg: 'token获取失败',
+                    request_id: '753894596' 
+                }    
+            };
+        }
+    }
+
+    /**
+     * 获取getToken
+     * getToken
+     */
+    public async getToken(wangwang:string) {
+        const collectionName = 'jushita_tokens';
+        await this.mongoClient.getDB();
+        const currentDateTime = new Date();
+        let query = {
+            wangwang_id: wangwang,
+        }
+        //获取wangwang对应的getToken
+        const result = await this.mongoClient.database.collection(collectionName).findOne(query);
+        return result;
     }
 }
-

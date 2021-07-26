@@ -39,3 +39,7 @@ testem.log
 Thumbs.db
 src/env/env.ts
 src/zhitongche/env/env.ts
+
+
+#test
+.lh/*

@@ -5,17 +5,13 @@
  * 超级推荐【商品推广】单元分时报表查询
  * 文档：https://open.taobao.com/API.htm?docId=43477&docType=2
  * */
-import _, { clone, values } from 'lodash';
+import _ from 'lodash';
 import { StrategyInterface } from '../strategy.interface';
 import { TaobaoFeedflowItemCrowdModifyBindClass, TaobaoFeedflowItemCrowdRpthourlistClass, TaobaoFeedflowItemCrowdPageClass } from '../../api';
-import {addMinutes, format, getHours, secondsInHour, subDays, subHours, subMinutes } from 'date-fns';
-import { exit } from 'process';
+import {format, getHours, subDays, subMinutes } from 'date-fns';
 import { TaobaoFeedflowItemCampaignGetClass } from '../../api/tuijian/taobao.feedflow.item.campaign.get.class';
 import { TaobaoFeedflowItemCampaignRpthourlistClass } from '../../api/tuijian/taobao.feedflow.item.campaign.rpthourlist.class';
-// import { MysqlClient } from '../../libs/mysqlClient';
 import { ZhiZuanMysql } from '../../libs/mysqlClient';
-import { log } from 'console';
-import { compileFunction } from 'vm';
 import { TaobaoFeedflowItemAdgroupPageClass } from '../../api/tuijian/taobao.feedflow.item.adgroup.page.class';
 import { TaobaoFeedflowItemCampaignModifyClass } from '../../api/tuijian/taobao.feedflow.item.campaign.modify.class';
 import { TaobaoFeedflowItemAdgroupRpthourlistClass } from '../../api/tuijian/taobao.feedflow.item.adgroup.rpthourlist.class';
@@ -28,14 +24,14 @@ export class AverageTimeStrategyClass implements StrategyInterface {
     private minPrice:number = 5; // 最低出价（分）
     private pastExecutions:number = 5;//需要查询对比的过去执行次数
     private excuteMinutes:number;//执行频率（单位：分钟）
-    private campaignPauseStatus:any;//计划是否需要修改为暂停
-    private campaignMysqlPauseStatus:any;//计划的状态在数据空中是否需要修改为暂停
+    private campaignPauseStatus:{[key:string]:{changeStatusPause:boolean}};//计划是否需要修改为暂停
+    private campaignMysqlPauseStatus:boolean;//计划的状态在数据空中是否需要修改为暂停
 
     /**
      * 构造查询参数
      * @param strategyData 用户传入数据
      */
-     constructor(strategyData:any,excuteMinutes:any,campaignPauseStatus:any,campaignMysqlPauseStatus:any){
+     constructor(strategyData:any,excuteMinutes:number,campaignPauseStatus:{[key:string]:{changeStatusPause:boolean}},campaignMysqlPauseStatus:boolean){
         this.strategyData = strategyData,
         this.excuteMinutes = excuteMinutes
         this.campaignPauseStatus = campaignPauseStatus
@@ -624,7 +620,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @param campaignIdArr 
      * @returns 
      */
-    public async getAdGroupIds(campaignIdArr:any){
+    public async getAdGroupIds(campaignIdArr:number[]){
         //拼凑参数
         let AdgroupInstanceParams = {
             campaign_id_list:campaignIdArr

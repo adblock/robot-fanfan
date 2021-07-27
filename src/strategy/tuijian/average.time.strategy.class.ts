@@ -5,7 +5,7 @@
  * 超级推荐【商品推广】单元分时报表查询
  * 文档：https://open.taobao.com/API.htm?docId=43477&docType=2
  * */
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { StrategyInterface } from '../strategy.interface';
 import { TaobaoFeedflowItemCrowdModifyBindClass, TaobaoFeedflowItemCrowdRpthourlistClass, TaobaoFeedflowItemCrowdPageClass } from '../../api';
 import {format, getHours, subDays, subMinutes } from 'date-fns';
@@ -31,7 +31,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * 构造查询参数
      * @param strategyData 用户传入数据
      */
-     constructor(strategyData:any,excuteMinutes:number,campaignPauseStatus:{[key:string]:{changeStatusPause:boolean}},campaignMysqlPauseStatus:boolean){
+     constructor(strategyData:object,excuteMinutes:number,campaignPauseStatus:{[key:string]:{changeStatusPause:boolean}},campaignMysqlPauseStatus:boolean){
         this.strategyData = strategyData,
         this.excuteMinutes = excuteMinutes
         this.campaignPauseStatus = campaignPauseStatus
@@ -58,6 +58,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
 
     /**
      * 获取计划对应的人群定向分时数据
+     * @param fliterData 实时数据实例
      * @returns 
      */
     private async getRptData(fliterData:TaobaoFeedflowItemCrowdRpthourlistClass){
@@ -70,7 +71,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             //获取有用数据
             let endResult = result.feedflow_item_crowd_rpthourlist_response.result.rpt_list.rpt_result_dto;
             //数据最终承载数组
-            let resultData =  this.makeCrowdData(endResult)
+            let resultData:{}[] =  this.makeCrowdData(endResult)
             return  resultData;
         }
     }
@@ -78,10 +79,9 @@ export class AverageTimeStrategyClass implements StrategyInterface {
     /**
      * 处理人群对应的数据
      * @param endResult 最终待处理数组
-     * @param resultData 最终数据结果 
      * @returns 
      */
-    public makeCrowdData(endResult:any) {
+    public makeCrowdData(endResult:{}) {
          //将数据按照人群id分组
          endResult = _.groupBy(endResult, "crowd_id");
          //数据最终承载数组
@@ -105,11 +105,9 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      */
     private async crowdPage() {
         //拼接查询参数
-        let requestData = {
-            adgroup_id: this.strategyData.f_adgroup_id,    
-        };
+        let requestData:{adgroup_id:number,} = {adgroup_id: this.strategyData.f_adgroup_id};
         // 批量获取人群出价
-        const crowdPageData = new TaobaoFeedflowItemCrowdPageClass(requestData, this.strategyData.f_wangwang);
+        const crowdPageData:TaobaoFeedflowItemCrowdPageClass = new TaobaoFeedflowItemCrowdPageClass(requestData, this.strategyData.f_wangwang);
         //同步获取数据，为了给下面的数据赋予人群id的键
         const crowdPageResult = await crowdPageData.getResponse();
         if(crowdPageResult.hasOwnProperty('error_response')){//如果报错 返回false
@@ -119,27 +117,26 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             // 根据人群id赋予键
             const result = _.keyBy(dataResult, 'crowd_id');
             return result;
-        }
-        
-       
+        } 
     }
 
     /**
      * 获取单品单元下人群列表，只获取投放中的
-     * @returns
+     * @param fliterData 实时数据实例
+     * @returns 
      */
-    private async getLastData(fliterData:TaobaoFeedflowItemCrowdRpthourlistClass,beginStart:any) {
+    private async getLastData(fliterData:TaobaoFeedflowItemCrowdRpthourlistClass) {
         //获取过去某个时间点的数据
-        const result = await fliterData.getResponseByDiffTime(this.theLastAdjusterDiffTime,this.pastExecutions);
+        const result:{}[] = await fliterData.getResponseByDiffTime(this.theLastAdjusterDiffTime,this.pastExecutions);
         //循环处理每一条数据,
-        result.forEach((value:any,key:any) => {
+        result.forEach((value:any,key:number) => {
             //如果数据为空||创建时间不是今天||报错||创建时间大于12分钟||创建时间大🐠阶段开始，则返回空数组
-            if(_.isEmpty(value) || value.created_am < format(subDays(new Date(), 1),'yyyy-MM-dd 23:59') || _.has(value.data,'error_response') || value.created_am < format(subMinutes(new Date(), 12),'yyyy-MM-dd HH:mm') || value.created_am < beginStart){
+            if(_.isEmpty(value) || value.created_am < format(subDays(new Date(), 1),'yyyy-MM-dd 23:59') || _.has(value.data,'error_response') || value.created_am < format(subMinutes(new Date(), 12),'yyyy-MM-dd HH:mm') || value.created_am < this.strategyData.f_start){
                 delete result[key];//删掉数据，可能不生效 原因未知
             }else{
                 let endResult = value.data.feedflow_item_crowd_rpthourlist_response.result.rpt_list.rpt_result_dto;
                 //数据处理//计算的仍然是凌晨到某个时刻的数据
-                let resultData = this.makeCrowdData(endResult)
+                let resultData:{}[] = this.makeCrowdData(endResult)
                 result[key] = _.keyBy(resultData, 'crowd_id');
             }
         });
@@ -152,8 +149,8 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @returns 
      */
     public makePriceAddRange(nowPrice:number) {
-        let price_range;
-        let maxPrice = this.strategyData.f_max_price
+        let price_range:number;
+        let maxPrice:number = this.strategyData.f_max_price
         if(nowPrice < maxPrice*0.1){//当前出价小于最高出价的10%，加价30%
             price_range = 0.3; //30%
         }else if(nowPrice >= maxPrice*0.1 && nowPrice <= maxPrice*0.3){//当前出价大于最高出价的10%，小于30%，加价10%
@@ -176,8 +173,8 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @returns 
      */
      public makePriceLessRange(nowPrice:number) {
-        let price_range;
-        let maxPrice = this.strategyData.f_max_price
+        let price_range:number;
+        let maxPrice:number = this.strategyData.f_max_price
         if(nowPrice >= maxPrice*0.1 && nowPrice <= maxPrice*0.3){ //大于最大值10%，小于30%，每次降价10%
             price_range = 0.1; //10%
         }else if(nowPrice > maxPrice*0.4 && nowPrice <= maxPrice*0.6){//大于最大值40%，小于60%，每次降价5%
@@ -202,58 +199,35 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             log_date : format(new Date(), 'yyyy-MM-dd'),
             start_hour_id : 0,
             end_hour_id : getHours(new Date()),
-            // end_hour_id : 12,
         };
 
-        const fliterData = new TaobaoFeedflowItemCrowdRpthourlistClass(requestData,this.strategyData.f_wangwang); //实例化
+        const fliterData:TaobaoFeedflowItemCrowdRpthourlistClass = new TaobaoFeedflowItemCrowdRpthourlistClass(requestData,this.strategyData.f_wangwang); //实例化
         return fliterData;
     }
 
-
-    /**
-     * 获取计划投放时段数据,型数据库获取
-     * @returns 
-     */
-    public async getCampaignTimesData() {
-        let MysqlClientInstance = await ZhiZuanMysql;
-        let where:any = {
-            'f_type': 'chaotui',//类型
-        };
-        let campaignTimesData = await MysqlClientInstance.table('t_automatic_operation_spider').where(where).select();
-        // 按照旺旺分组
-        campaignTimesData = _.groupBy(campaignTimesData,'f_wangwang');
-        // 循环旺旺并把旺旺下的计划分组
-        _.forEach(campaignTimesData,function (value:any,key:any) {
-            campaignTimesData[key] = _.groupBy(value,'f_campaign_id');
-        });
-        return campaignTimesData;
-    }
-
-
     /**
      * 处理数据 计算人群出价
+     * @param rptDataResult 实时数据
      * @param lastResult 历史数据
-     * @param crowdModifyRequest 数据修改接口所需数据
-     * @param strategyData 阶段信息
      * @param beginStartStatus 阶段初始状态
      * @returns 
      */
-    private async makeCrowdPrice(rptDataResult:any,lastResult:any,beginStartStatus:any){
+    private async makeCrowdPrice(rptDataResult:{}[],lastResult:{}[],beginStartStatus:boolean|null){
         //获取修改人群出价接口需要的数据格式
         let crowdModifyRequest = await this.crowdModifyRequest();
         //单元下的人群出价
-        let crowdPageResult = await this.crowdPage(); 
+        let crowdPageResult:boolean|object = await this.crowdPage(); 
         if(crowdPageResult === false) return crowdModifyRequest;
         //计算剩余时间（分钟）=阶段投放截止时间-当前时间/60秒/1000毫秒 //此处有个问题，如果开始结束跨天则很难搞
-        let surplusMinutes = _.round((new Date(this.strategyData.f_end).getTime()-new Date().getTime())/60/1000);
+        let surplusMinutes:number = _.round((new Date(this.strategyData.f_end).getTime()-new Date().getTime())/60/1000);
         //计算单元当前的总消耗（转换单位为分）
-        let adGroupCost = _.sum(_.map(_.map(rptDataResult,'charge'),_.toNumber));
+        let adGroupCost:number = _.sum(_.map(_.map(rptDataResult,'charge'),_.toNumber));
         //简化单元初始消耗 并转换为分,如果没有则认为是0
-        let adGroupFirstCharge = (this.strategyData.f_crowd_start_charge[this.strategyData.f_adgroup_id] ?? 0) * 100;
+        let adGroupFirstCharge:number = (this.strategyData.f_crowd_start_charge[this.strategyData.f_adgroup_id] ?? 0) * 100;
         //剩余单元阶段总预算=单元阶段预算-（当前单元消耗-单元阶段初始消耗）
-        let surplusBudget = this.strategyData.f_budget - (adGroupCost - adGroupFirstCharge);
+        let surplusBudget:number= this.strategyData.f_budget - (adGroupCost - adGroupFirstCharge);
         //计算人群平均花费 = 剩余总预算/人群数量/剩余分钟数/每次执行时间
-        const crowdAverageCost = _.round((surplusBudget/_.size(crowdPageResult)/surplusMinutes*this.excuteMinutes),0); 
+        const crowdAverageCost:number = _.round((surplusBudget/_.size(crowdPageResult)/surplusMinutes*this.excuteMinutes),0); 
         //更改人群状态,只有超额和首次开始会修改状态
         let changeCrowdPageResult = await this.changeCrowdPageStatus(crowdPageResult,surplusBudget,beginStartStatus,crowdModifyRequest);
         crowdModifyRequest = changeCrowdPageResult.crowdModifyRequest;//重新为数据修改接口所需数据赋值
@@ -266,21 +240,19 @@ export class AverageTimeStrategyClass implements StrategyInterface {
 
     /**
      * 修改数据库的阶段自动计划信息
-     * @param strategyData 阶段信息自动计划数据
-     * @param campaignCost 此刻的计划总花费（单位是分）
      * @returns 
      */
     public async updateAutoMaticData() {
          //获取mysql实例
          let MysqlClientInstance = await ZhiZuanMysql;
          //设置修改条件
-         let where:any = {
+         let where:{} = {
              'id':  this.strategyData.id, //数据对应的id
          };
          //防止读取的时候报错
          if(this.strategyData.f_crowd_start_charge === undefined)this.strategyData.f_crowd_start_charge = {};
          //添加修改字段
-         let update = {
+         let update:{} = {
              'f_start_charge' : _.round( this.strategyData.f_start_charge/100,2),//转化为元
              'f_crawl_date' : format(new Date(),'yyyy-MM-dd'),//将最后执行日期改为今天
              'f_crowd_start_charge' : JSON.stringify( this.strategyData.f_crowd_start_charge),//添加阶段开始时各个单元对应的花费，需要注意的是这里添加的是计划下面所有单元的数据,转换为json字符串，单位是元
@@ -295,8 +267,8 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      */
     public async updateAutoMaticDataStatus(status:string) {
         let MysqlClientInstance = ZhiZuanMysql;
-        let where:any = { 'id':  this.strategyData.id }; //数据对应的id
-        let update = {'f_status' : status};//修改状态
+        let where:{} = { 'id':  this.strategyData.id }; //数据对应的id
+        let update:{} = {'f_status' : status};//修改状态
         await MysqlClientInstance.table('t_automatic_operation_spider').where(where).update(update);//修改相关数据
     }
 
@@ -308,9 +280,9 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @param crowdModifyRequest 数据修改接口所需数据
      * @returns 
      */
-    public async changeCrowdPageStatus(crowdPageResult:any,surplusBudget:any,beginStartStatus:any,crowdModifyRequest:any){
-        Object.keys(crowdPageResult).forEach((value:any) => {
-            let status = '';
+    public async changeCrowdPageStatus(crowdPageResult:any,surplusBudget:number,beginStartStatus:boolean|null,crowdModifyRequest:any){
+        Object.keys(crowdPageResult).forEach((value:string) => {
+            let status:string = '';
             // 如果是阶段开始的话，所有人群开启
             if(beginStartStatus){
                 status = 'start'
@@ -344,7 +316,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @param crowdModifyRequest 价格修改接口所需参数
      * @returns 
      */
-    public async makeRptDataInfo(rptDataResult:any,surplusBudget:any,crowdPageResult:any,lastResult:any,crowdAverageCost:any,crowdModifyRequest:any) {
+    public async makeRptDataInfo(rptDataResult:{}[],surplusBudget:number,crowdPageResult:any,lastResult:{}[],crowdAverageCost:number,crowdModifyRequest:any) {
         rptDataResult.forEach( (filter:any)=>{
             if(!(filter.crowd_id in crowdPageResult)){
                 //如果没有当前人群的出价或者暂停，说明是非投放中，则不作处理//return 跳出当次循环
@@ -357,12 +329,12 @@ export class AverageTimeStrategyClass implements StrategyInterface {
                     return; 
                 }
             }
-            let  price = this.minPrice;  // 定义初始出价
-            let  status = 'start'; // 定义初始状态
-            let last_charge = this.makeLastCharge(lastResult,filter);//上次花费
+            let  price:number = this.minPrice;  // 定义初始出价
+            let  status:string = 'start'; // 定义初始状态
+            let last_charge:number = this.makeLastCharge(lastResult,filter);//上次花费
             last_charge = last_charge === 0 ? filter.charge : last_charge;
-            let crowdPagePrice = crowdPageResult[filter.crowd_id].price;//当前出价
-            let stageCharge = filter.charge - last_charge;  //上次执行到本次执行的消耗(单位：分)
+            let crowdPagePrice:number = crowdPageResult[filter.crowd_id].price;//当前出价
+            let stageCharge:number = filter.charge - last_charge;  //上次执行到本次执行的消耗(单位：分)
             //计算本次出价
             price = this.makePrice(stageCharge,crowdAverageCost,crowdPagePrice,filter,lastResult,crowdPageResult);
             //拼凑需要修改的数据
@@ -384,7 +356,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @returns last_charge 上次人群花费
      */
     public makeLastCharge(lastResult:any,filter:any) {
-        let last_charge;//定义上次消耗
+        let last_charge:number;//定义上次消耗
         if(_.isEmpty(lastResult)){ //如果没有之前的数据，则上次消耗记为0
             last_charge = 0
         }else{
@@ -403,12 +375,12 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @param crowdPageResult 实时出价结果
      * @return price 出价
      */
-    public makePrice(stageCharge:any,crowdAverageCost:any,crowdPagePrice:any,filter:any,lastResult:any,crowdPageResult:any){
-        let price;//出价
-        let price_range;//调价比例
+    public makePrice(stageCharge:number,crowdAverageCost:number,crowdPagePrice:number,filter:any,lastResult:any,crowdPageResult:any){
+        let price:number;//出价
+        let price_range:number;//调价比例
         if(stageCharge > crowdAverageCost){    
             console.log(crowdPageResult[filter.crowd_id].crowd_name + "上次到这次的花费" + stageCharge + "，平均花费为"+ crowdAverageCost + "，降价了") 
-            let beyondRange = stageCharge / crowdAverageCost;//超出比例
+            let beyondRange:number = stageCharge / crowdAverageCost;//超出比例
             price_range = this.makePriceLessRange(crowdPagePrice);//计算降价价比例
             price = _.round(crowdPagePrice * (1 - price_range * beyondRange)  ,0);//按比例调整价格,因为单位是分，所以不保留小数
         }else{
@@ -443,21 +415,21 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @param crowdAverageCost 平均出价
      * @returns 
      */
-    private makeLastPrice(lastResult:any,crowdPagePrice:any,filter:any,crowdAverageCost:any):number{
-        let price:any = crowdPagePrice;//出价变量,给予当前出价作为默认值
+    private makeLastPrice(lastResult:any,crowdPagePrice:number,filter:any,crowdAverageCost:number):number{
+        let price:number = crowdPagePrice;//出价变量,给予当前出价作为默认值
         let price_range;//加价比例
-        let adPvPrice = false;//是否根据展现改价
-        lastResult.forEach((value:any,key:any) => {
+        let adPvPrice:boolean = false;//是否根据展现改价
+        lastResult.forEach((value:any,key:number) => {
             if(key <= 0){ //如果是第一次 因为上面已经比较完  跳过
                 return; //跳出本次循环
             }
-            let last_charge = value.hasOwnProperty(filter.crowd_id) ? value[filter.crowd_id].charge : 0; //上次花费
+            let last_charge:number = value.hasOwnProperty(filter.crowd_id) ? value[filter.crowd_id].charge : 0; //上次花费
            
-            let stageCharge = filter.charge - last_charge;//上次执行到本次执行的消耗
+            let stageCharge:number = filter.charge - last_charge;//上次执行到本次执行的消耗
             //如果小于平均花费则处理，如果大于则保持当前价格
             if(stageCharge < crowdAverageCost){
                 //这里加一次关于展现的过滤
-                let last_ad_pv = value.hasOwnProperty(filter.crowd_id) ? value[filter.crowd_id].ad_pv : 0; //上次展现数
+                let last_ad_pv:number = value.hasOwnProperty(filter.crowd_id) ? value[filter.crowd_id].ad_pv : 0; //上次展现数
                 let stageAdPv = last_ad_pv > 0 ? (filter.ad_pv - last_ad_pv)/last_ad_pv : 1;//阶段展现比率
                 //如果展现比率大于百分之4（根据后台数据发现 每两分钟的最小展现比率大概是4百分之）* 运行频率，则不加价，否则加价
                 if(stageAdPv >= 0.04 * key){
@@ -485,11 +457,11 @@ export class AverageTimeStrategyClass implements StrategyInterface {
     public makeOverageData(crowdPageResult:any,crowdModifyRequest:any){
         let price_range;//价格修改比例
          //处理出价接口未曾处理的数据（说明还没有展现）
-         Object.keys(crowdPageResult).forEach((value:any) => {
+         Object.keys(crowdPageResult).forEach((value:string) => {
             if(crowdPageResult[value].price <= this.strategyData.f_max_price){
                 price_range = this.makePriceAddRange(crowdPageResult[value].price)
-                let price;
-                let tmpPrice = _.round(crowdPageResult[value].price * (1 + price_range))
+                let price:number;
+                let tmpPrice:number = _.round(crowdPageResult[value].price * (1 + price_range))
                 price = (tmpPrice<=this.strategyData.f_max_price) ? tmpPrice : this.strategyData.f_max_price; //按比例调整价格
                 console.log(crowdPageResult[value].crowd_name + "人群没有数据,所以需要加价") 
                 //拼接需要修改的数据
@@ -508,7 +480,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @param crowd_id 人群对应的id
      * @returns 返回需要修改的数据
      */
-    public makeCrowdModifyRequest(crowdModifyRequest:any,price:any,status:any,crowd_id:any){
+    public makeCrowdModifyRequest(crowdModifyRequest:any,price:number,status:string,crowd_id:number){
         crowdModifyRequest.crowds.unshift({
             price : price,
             status : status,
@@ -523,12 +495,10 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @returns 
      */
     public async getCampaignInfo(){
-        let requestData = {//拼凑参数
-            campagin_id : this.strategyData.f_campaign_id
-        };
-        let campaignItemClass =  new TaobaoFeedflowItemCampaignGetClass(requestData,this.strategyData.f_wangwang);
+        let requestData:{ campagin_id:number} = {campagin_id : this.strategyData.f_campaign_id};//拼凑参数
+        let campaignItemClass:TaobaoFeedflowItemCampaignGetClass =  new TaobaoFeedflowItemCampaignGetClass(requestData,this.strategyData.f_wangwang);
         let dayBudget = await campaignItemClass.getResponse();
-        if(dayBudget.hasOwnProperty('error_response')){//如果报错 返回false
+        if(dayBudget.hasOwnProperty('error_response')){//如果报错 返回0
             dayBudget = 0;
         }else{
             dayBudget = dayBudget.feedflow_item_campaign_get_response.result.result.day_budget;
@@ -570,11 +540,11 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @returns 
      */
     public async changeCampaignStatus(status:string){
-        let requestData = {//拼凑参数
+        let requestData:{campaign_id:number,status:string} = {//拼凑参数
             campaign_id : this.strategyData.f_campaign_id,
             status : status
         };
-        let campaignItemClass =  new TaobaoFeedflowItemCampaignModifyClass(requestData,this.strategyData.f_wangwang);
+        let campaignItemClass:TaobaoFeedflowItemCampaignModifyClass =  new TaobaoFeedflowItemCampaignModifyClass(requestData,this.strategyData.f_wangwang);
         await campaignItemClass.getResponse();
         //同时需要将数据库的f_status修改
         await this.updateAutoMaticDataStatus(status);
@@ -582,9 +552,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
 
     /**
      * 从数据库获取阶段投放数据并确定投放时段
-     * @param campaignTimesData //计划信息
-     * @param campaignId 计划id
-     * @returns 阶段投放信息数据
+     * @returns
      */
     public async makeTimesData(){
         //添加带日期的阶段开始和结束时间
@@ -617,26 +585,24 @@ export class AverageTimeStrategyClass implements StrategyInterface {
 
     /**
      * 获取计划对应的单元数组
-     * @param campaignIdArr 
+     * @param campaignIdArr 计划id数组
      * @returns 
      */
     public async getAdGroupIds(campaignIdArr:number[]){
         //拼凑参数
-        let AdgroupInstanceParams = {
-            campaign_id_list:campaignIdArr
-        };
+        let AdgroupInstanceParams:{campaign_id_list:Number[],adgroup_id_list?:Number[]} = {campaign_id_list:campaignIdArr};
         //获取数据
-        let AdgroupInstance = new TaobaoFeedflowItemAdgroupPageClass(AdgroupInstanceParams,this.strategyData.f_wangwang);
+        let AdgroupInstance:TaobaoFeedflowItemAdgroupPageClass = new TaobaoFeedflowItemAdgroupPageClass(AdgroupInstanceParams,this.strategyData.f_wangwang);
         let adgroupPage =  await AdgroupInstance.getResponse();
 
         if(adgroupPage.hasOwnProperty('error_response')){//如果报错 返回false
-            adgroupPage = false;
+            adgroupPage = [];
         }else{
             adgroupPage = adgroupPage.feedflow_item_adgroup_page_response.result;//将数据格式化
             if(adgroupPage.hasOwnProperty('results') ){//判断是否有内容
                 adgroupPage = adgroupPage.results.adgroup_d_to;
             }else{
-                adgroupPage = false;
+                adgroupPage = [];
             }
         }
         return adgroupPage;
@@ -655,7 +621,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             end_hour_id : getHours(new Date()),
         };
         //实例化
-        let adGroupCostInstance = new TaobaoFeedflowItemAdgroupRpthourlistClass(requestData,this.strategyData.f_wangwang);
+        let adGroupCostInstance:TaobaoFeedflowItemAdgroupRpthourlistClass = new TaobaoFeedflowItemAdgroupRpthourlistClass(requestData,this.strategyData.f_wangwang);
         //获取数据
         let adGroupCostData = await adGroupCostInstance.getResponse();
          //数据最终承载数组
@@ -670,7 +636,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             //循环处理每个单元的数据
             _.forEach(adGroupCostData, function(value, key) {
                 //计算花费
-                let tmpSum = _.round(_.sum(_.map(_.map(value,'charge'),_.toNumber)),2);
+                let tmpSum:number = _.round(_.sum(_.map(_.map(value,'charge'),_.toNumber)),2);
                 //合并对象
                 resultData = _.assign(resultData, {[key] : tmpSum });
             });
@@ -683,12 +649,12 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      * @param campaignCost 计划当前的消耗
      * @returns 
      */
-    public async getBeginStartStatus(campaignCost:any){
-        let beginStartStatus:any = null;//是否开启，针对的是状态
+    public async getBeginStartStatus(campaignCost:number){
+        let beginStartStatus:boolean|null = null;//是否开启，针对的是状态
         //如果最后执行时间不是今天，则更新数据库数据状态，
         if(this.strategyData.f_crawl_date != format(new Date(),'yyyy-MM-dd')){
             //获取计划下 所有单元对应的阶段初始消耗(单位：元)
-            let adGroupCostArr:any = await this.getAdGroupCostData();
+            let adGroupCostArr:{}|boolean = await this.getAdGroupCostData();
             if(adGroupCostArr === false) return false;//如果报错 则返回false
             this.strategyData.f_start_charge = campaignCost;//将计划阶段初始消耗修改
             this.strategyData.f_crowd_start_charge = adGroupCostArr;//将计划下的单元阶段初始消耗修改
@@ -702,7 +668,6 @@ export class AverageTimeStrategyClass implements StrategyInterface {
 
     /**
      * 数据处理并修改数据
-     * @param fliterDataResult 获取到的计划下的人群数据
      * @returns 
      */
      private async adjuster(){
@@ -719,15 +684,15 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             }
         }
 
-        let adgroupInfos = await this.getAdGroupIds([this.strategyData.f_campaign_id]);//根据计划id获取计划下所有的单元
-        if(!adgroupInfos) return "没有单元数据";//如果没有数据直接跳过      
+        let adgroupInfos:any[] = await this.getAdGroupIds([this.strategyData.f_campaign_id]);//根据计划id获取计划下所有的单元
+        if(isEmpty(adgroupInfos)) return "没有单元数据";//如果没有数据直接跳过      
         await this.makeTimesData();//修改this.strategyData的数据格式
 
-        let campaignBudget = await this.getCampaignInfo();// 获取计划对应的总预算，单位是分
-        let campaignCost = await this.getCampaignCostInfo(); //获取计划已消耗金额，单位是分
+        let campaignBudget:number = await this.getCampaignInfo();// 获取计划对应的总预算，单位是分
+        let campaignCost:number|false = await this.getCampaignCostInfo(); //获取计划已消耗金额，单位是分
         if(campaignCost === false) return "计划消耗获取失败，修改终止" ;
-        let surplusCampaignBudget = campaignBudget - campaignCost;//计算计划剩余总预算
-        let beginStartStatus:any = await this.getBeginStartStatus(campaignCost);//是否开启，针对的是状态
+        let surplusCampaignBudget:number = campaignBudget - campaignCost;//计算计划剩余总预算
+        let beginStartStatus:boolean|null = await this.getBeginStartStatus(campaignCost);//是否开启，针对的是状态
         if(beginStartStatus === false) return "单元数据获取失败，修改终止";
         //计算每日预算不足或者阶段预算不足，则暂停计划
         if(surplusCampaignBudget <= 0 || (campaignCost - this.strategyData.f_start_charge) >= this.strategyData.f_budget){
@@ -739,7 +704,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
         for(let adgroupInfo of adgroupInfos){//循环处理每个单元
             this.strategyData.f_adgroup_id = adgroupInfo.adgroup_id;//为通用字段单元id赋值                   
             let fliterData = await this.instanceTaobaoFeedflowItemCrowdRpthourlistClass(); //实例化实时数据类                        
-            const lastResult = await this.getLastData(fliterData,this.strategyData.f_start); //人群存储在mongo中的最后某几次出价（或展现）                     
+            const lastResult:{}[] = await this.getLastData(fliterData); //人群存储在mongo中的最后某几次出价（或展现）                     
             const rptDataResult = await this.getRptData(fliterData); //人群实时数据                      
             if(rptDataResult.error_response){ //如果出错 跳出本次循环
                 console.log(rptDataResult.error_response);//单元下的人群实时数据出错，跳出循环

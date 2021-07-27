@@ -1,7 +1,7 @@
 /*
  * @Author: xingchen
  * @Date: 2021-06-08 10:36:45
- * @LastEditTime: 2021-07-26 16:26:13
+ * @LastEditTime: 2021-07-27 14:36:21
  * @Description: 
  */
 import  format from 'date-fns/format';
@@ -33,8 +33,7 @@ const orderRunState:number = 2;//订单投放中状态
 
 /**
  * 获取订单在boss投放状态
- * @param wangwang 
- * @param type 
+ * @param campaignTimesDataInfo 数据库调价的阶段数据
  * @returns 
  */
 async function getOrderStatus(campaignTimesDataInfo:object[]) {

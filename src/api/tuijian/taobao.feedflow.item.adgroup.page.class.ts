@@ -1,7 +1,7 @@
 /*
  * @Author: xingchen
  * @Date: 2021-06-24 14:14:26
- * @LastEditTime: 2021-07-14 15:22:52
+ * @LastEditTime: 2021-07-27 10:54:26
  * @Description:  查询单元列表:https://open.taobao.com/api.htm?docId=43323&docType=2&source=search
  */
 
@@ -10,10 +10,8 @@ import {TuijianApiClass} from "./tuijian.api.class";
 
 export class TaobaoFeedflowItemAdgroupPageClass extends TuijianApiClass implements ApiInterface {
     constructor(request:{
-        // adgroup_query:{
-            campaign_id_list:Number[],
-            adgroup_id_list?:Number[],
-        // };
+        campaign_id_list:Number[],
+        adgroup_id_list?:Number[],
     }, wangwang:string){
         super();
         this.request = request;

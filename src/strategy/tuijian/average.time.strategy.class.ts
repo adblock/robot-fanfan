@@ -24,18 +24,18 @@ export class AverageTimeStrategyClass implements StrategyInterface {
     private minPrice:number = 5; // 最低出价（分）
     private pastExecutions:number = 5;//需要查询对比的过去执行次数
     private excuteMinutes:number;//执行频率（单位：分钟）
-    private campaignPauseStatus:{[key:string]:{changeStatusPause:boolean}};//计划是否需要修改为暂停
-    private campaignMysqlPauseStatus:boolean;//计划的状态在数据空中是否需要修改为暂停
+    private campaignPauseStatus:string;//计划是否需要修改为暂停
+    private campaignMysqlPauseStatus:string;//计划的状态在数据空中是否需要修改为暂停
 
     /**
      * 构造查询参数
      * @param strategyData 用户传入数据
      */
-     constructor(strategyData:object,excuteMinutes:number,campaignPauseStatus:{[key:string]:{changeStatusPause:boolean}},campaignMysqlPauseStatus:boolean){
-        this.strategyData = strategyData,
-        this.excuteMinutes = excuteMinutes
-        this.campaignPauseStatus = campaignPauseStatus
-        this.campaignMysqlPauseStatus = campaignMysqlPauseStatus
+     constructor(strategyData:any,excuteMinutes:number,campaignPauseStatus:string,campaignMysqlPauseStatus:string){
+        this.strategyData = strategyData;
+        this.excuteMinutes = excuteMinutes;
+        this.campaignPauseStatus = campaignPauseStatus;
+        this.campaignMysqlPauseStatus = campaignMysqlPauseStatus;
     }
 
     /**
@@ -59,7 +59,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
     /**
      * 获取计划对应的人群定向分时数据
      * @param fliterData 实时数据实例
-     * @returns 
+     * @returns
      */
     private async getRptData(fliterData:TaobaoFeedflowItemCrowdRpthourlistClass){
         //获取数据
@@ -117,13 +117,13 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             // 根据人群id赋予键
             const result = _.keyBy(dataResult, 'crowd_id');
             return result;
-        } 
+        }
     }
 
     /**
      * 获取单品单元下人群列表，只获取投放中的
      * @param fliterData 实时数据实例
-     * @returns 
+     * @returns
      */
     private async getLastData(fliterData:TaobaoFeedflowItemCrowdRpthourlistClass) {
         //获取过去某个时间点的数据
@@ -216,7 +216,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
         //获取修改人群出价接口需要的数据格式
         let crowdModifyRequest = await this.crowdModifyRequest();
         //单元下的人群出价
-        let crowdPageResult:boolean|object = await this.crowdPage(); 
+        let crowdPageResult:boolean|object = await this.crowdPage();
         if(crowdPageResult === false) return crowdModifyRequest;
         //计算剩余时间（分钟）=阶段投放截止时间-当前时间/60秒/1000毫秒 //此处有个问题，如果开始结束跨天则很难搞
         let surplusMinutes:number = _.round((new Date(this.strategyData.f_end).getTime()-new Date().getTime())/60/1000);
@@ -227,7 +227,7 @@ export class AverageTimeStrategyClass implements StrategyInterface {
         //剩余单元阶段总预算=单元阶段预算-（当前单元消耗-单元阶段初始消耗）
         let surplusBudget:number= this.strategyData.f_budget - (adGroupCost - adGroupFirstCharge);
         //计算人群平均花费 = 剩余总预算/人群数量/剩余分钟数/每次执行时间
-        const crowdAverageCost:number = _.round((surplusBudget/_.size(crowdPageResult)/surplusMinutes*this.excuteMinutes),0); 
+        const crowdAverageCost:number = _.round((surplusBudget/_.size(crowdPageResult)/surplusMinutes*this.excuteMinutes),0);
         //更改人群状态,只有超额和首次开始会修改状态
         let changeCrowdPageResult = await this.changeCrowdPageStatus(crowdPageResult,surplusBudget,beginStartStatus,crowdModifyRequest);
         crowdModifyRequest = changeCrowdPageResult.crowdModifyRequest;//重新为数据修改接口所需数据赋值
@@ -672,20 +672,20 @@ export class AverageTimeStrategyClass implements StrategyInterface {
      */
      private async adjuster(){
         //判断是否需要暂停
-        if(this.campaignPauseStatus[this.strategyData.f_campaign_id].changeStatusPause){
+        if(this.campaignPauseStatus === 'pause'){
             console.log(`计划${this.strategyData.f_campaign_name}未在投放时间段内，计划暂停`);
             await this.changeCampaignStatus('pause'); //如果没有符合条件的数据，将计划暂停
             return "未在投放时间段内，计划暂停";//循环终止
         }else{
             //判断数据库状态是否需要修改
-            if(this.campaignMysqlPauseStatus){
+            if(this.campaignMysqlPauseStatus === 'pause'){
                 await this.updateAutoMaticDataStatus('pause');
                 return "当前自动操作未在投放时间段内，修改数据库计划状态为暂停";//循环终止
             }
         }
 
         let adgroupInfos:any[] = await this.getAdGroupIds([this.strategyData.f_campaign_id]);//根据计划id获取计划下所有的单元
-        if(isEmpty(adgroupInfos)) return "没有单元数据";//如果没有数据直接跳过      
+        if(isEmpty(adgroupInfos)) return "没有单元数据";//如果没有数据直接跳过
         await this.makeTimesData();//修改this.strategyData的数据格式
 
         let campaignBudget:number = await this.getCampaignInfo();// 获取计划对应的总预算，单位是分
@@ -701,10 +701,10 @@ export class AverageTimeStrategyClass implements StrategyInterface {
             return "预算不足，计划被暂停";//循环终止
         }
         this.strategyData.f_budget = _.round(this.strategyData.f_budget/adgroupInfos.length);//重新计算当前计划下的每个单元对应的预算 
-        for(let adgroupInfo of adgroupInfos){//循环处理每个单元
+        for(let adgroupInfo of adgroupInfos){ //循环处理每个单元
             this.strategyData.f_adgroup_id = adgroupInfo.adgroup_id;//为通用字段单元id赋值                   
             let fliterData = await this.instanceTaobaoFeedflowItemCrowdRpthourlistClass(); //实例化实时数据类                        
-            const lastResult:{}[] = await this.getLastData(fliterData); //人群存储在mongo中的最后某几次出价（或展现）                     
+            const lastResult:{}[] = await this.getLastData(fliterData); //人群存储在mongo中的最后某几次出价（或展现）
             const rptDataResult = await this.getRptData(fliterData); //人群实时数据                      
             if(rptDataResult.error_response){ //如果出错 跳出本次循环
                 console.log(rptDataResult.error_response);//单元下的人群实时数据出错，跳出循环

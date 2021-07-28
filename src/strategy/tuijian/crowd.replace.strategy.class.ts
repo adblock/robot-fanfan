@@ -1,7 +1,7 @@
 /*
  * @Author: xingchen
  * @Date: 2021-06-24 13:51:38
- * @LastEditTime: 2021-06-24 16:58:21
+ * @LastEditTime: 2021-07-27 10:54:58
  * @Description: 定时轮替单元人群的策略
  */
 
@@ -52,10 +52,8 @@ export class CrowdReplaceStrategyClass implements StrategyInterface {
      */
     public async getAdgroupPageData() {
         let request = {
-            adgroup_query : {
-                adgroup_id_list:[this.strategyData.adgroup_id],
-                campaign_id_list:[this.strategyData.campaign_id]
-            }
+            adgroup_id_list:[this.strategyData.adgroup_id],
+            campaign_id_list:[this.strategyData.campaign_id]
         }
         //获取计划下的所有的单元id
         let adgroupPageData = new TaobaoFeedflowItemAdgroupPageClass(request,this.strategyData.wangwangid);
